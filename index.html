@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kocia Biblioteka</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <main id="stage">
+      <div id="hud">
+        <span class="hud-item region" id="hud-region">🌲 Polski las</span>
+        <span class="hud-item name" id="hud-name">🐱 Kotka</span>
+        <span class="hud-item">☀️ Dzień <b id="hud-day">1</b></span>
+        <span class="hud-item coins">🪙 <b id="hud-coins">0</b></span>
+        <span class="hud-item">💗 <b id="hud-hearts">0</b></span>
+        <span class="hud-item">🐾 Goście <b id="hud-progress">0/6</b></span>
+        <span class="hud-right">
+          <button id="btn-music" class="hud-btn icon" type="button" aria-label="Muzyka">🎵</button>
+          <button id="btn-sfx" class="hud-btn icon" type="button" aria-label="Efekty dźwiękowe">🔊</button>
+          <button id="btn-map" class="hud-btn" type="button">🗺️ Mapa</button>
+        </span>
+      </div>
+
+      <div id="canvas-wrap">
+        <canvas id="game"></canvas>
+
+        <div id="picker" class="picker" hidden>
+          <div class="picker-head"><b id="picker-title">Wybierz kategorię</b><button id="picker-close" type="button" aria-label="Zamknij">✕</button></div>
+          <ul id="picker-list"></ul>
+        </div>
+
+        <div id="touch-ui" aria-hidden="true">
+          <div id="joy"><div id="joy-knob"></div></div>
+          <button id="btn-act" type="button" aria-label="Akcja">🐾</button>
+        </div>
+
+        <div id="overlay-title" class="overlay">
+          <div class="card title-card">
+            <canvas id="title-cat"></canvas>
+            <h1>Kocia Biblioteka</h1>
+            <p class="sub">Jesteś trzykolorową kotką, która prowadzi przytulną bibliotekę z księgarnią.
+              Leśni goście przychodzą kupić albo wypożyczyć książkę. Przynieś im właściwą!</p>
+            <label class="name-field" for="cat-name">Jak ma na imię Twoja kotka?
+              <input id="cat-name" type="text" maxlength="14" placeholder="np. Lili" autocomplete="off" spellcheck="false">
+            </label>
+            <div class="buttons">
+              <button id="btn-continue" type="button" hidden>Kontynuuj</button>
+              <button id="btn-start" type="button">Otwórz bibliotekę</button>
+            </div>
+            <div id="confirm-new" class="confirm" hidden>
+              <p>Nowa gra usunie zapisany postęp. Na pewno?</p>
+              <div class="buttons">
+                <button id="btn-new-yes" type="button" class="danger">Tak, zacznij od nowa</button>
+                <button id="btn-new-no" type="button" class="secondary">Nie</button>
+              </div>
+            </div>
+            <p class="keys keys-desktop"><kbd>WASD</kbd>/<kbd>strzałki</kbd> chodzenie · <kbd>E</kbd>/<kbd>Spacja</kbd> akcja</p>
+            <p class="keys keys-touch">Joystick po lewej: chodzenie · 🐾 po prawej: akcja</p>
+            <p class="keys">🎵 Gra ma muzykę i dźwięki. Wyciszysz je przyciskami u góry.</p>
+          </div>
+        </div>
+
+        <div id="overlay-summary" class="overlay" hidden>
+          <div class="card summary-card">
+            <div class="sum-cols">
+              <section class="sum-left">
+                <h1 id="sum-title">Koniec dnia</h1>
+                <ul id="sum-stats" class="stats"></ul>
+                <p id="sum-line" class="sub"></p>
+                <p id="sum-note" class="note"></p>
+              </section>
+              <section class="sum-right">
+                <h2>Sklep ulepszeń <span class="coins-pill">🪙 <b id="shop-coins"></b></span></h2>
+                <div id="shop"></div>
+              </section>
+            </div>
+            <div class="buttons">
+              <button id="btn-map-sum" type="button" class="secondary">🗺️ Mapa świata</button>
+              <button id="btn-next" type="button">Następny dzień →</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="overlay-map" class="overlay" hidden>
+          <div class="card map-card">
+            <h1>Mapa świata</h1>
+            <p class="sub">Kocia Biblioteka otwiera filie w różnych zakątkach świata. W każdym czekają inni goście.</p>
+            <p id="map-note" class="note"></p>
+            <ul id="map-list"></ul>
+            <div class="buttons"><button id="btn-map-close" type="button">Wróć</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="hint">Podejdź do szafy lub lady i naciśnij E</div>
+    </main>
+
+    <aside id="panel">
+      <section>
+        <h2>Goście przy ladzie</h2>
+        <ul id="requests"></ul>
+        <p id="cart-info" class="note"></p>
+      </section>
+      <section>
+        <h2 id="carry-title">W łapkach</h2>
+        <div id="carry"><i>Nic, łapki wolne</i></div>
+        <p id="loans" class="note"></p>
+      </section>
+      <section>
+        <h2>Zapas na półkach</h2>
+        <ul id="stock"></ul>
+      </section>
+      <section class="howto">
+        <h2>Jak grać</h2>
+        <ol>
+          <li>Dymek gościa pokazuje kolor książki (kategorię) oraz 🪙 „kup” albo 🔄 „pożycz”. Nikt się nie spieszy, goście czekają cierpliwie.</li>
+          <li>Podejdź do szafy, naciśnij <kbd>E</kbd> i wybierz kategorię.</li>
+          <li>Stań pod ladą naprzeciw gościa i podaj książkę <kbd>E</kbd>.</li>
+          <li>Zwroty z kosza odłóż do szafy. Monety wydasz w sklepie na koniec dnia.</li>
+        </ol>
+      </section>
+    </aside>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/customers.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/touch.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
