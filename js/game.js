@@ -107,6 +107,7 @@ function beginDay() {
   G.endTimer = -1;
   Cat.reset();
   Act.reset();
+  Yarn.reset();
   Camera.x = Camera.y = null;
   G.state = 'play';
   buildWorld();
@@ -231,6 +232,8 @@ function addCoins(n, x, y) {
 
 /* ---------------- INTERAKCJE ---------------- */
 function whatIsAt(tx, ty) {
+  const yarn = Yarn.facing();
+  if (yarn) return yarn;
   const bc = bookcaseAt(tx, ty);
   if (bc) return { type: 'bookcase', bc };
   if (ty === COUNTER_ROW && activeSlotCols().includes(tx)) return { type: 'slot', col: tx, customer: customerAtSlot(tx) };
@@ -294,6 +297,7 @@ function interact() {
   const fx = Cat.x, fy = Cat.y - 90;
   if (!what) return;
 
+  if (what.type === 'yarn') return Yarn.bat();
   if (['armchair', 'read', 'plant', 'lights'].includes(what.type)) return Act.start(what);
 
   if (what.type === 'bookcase') {
@@ -375,6 +379,7 @@ function hintText() {
   if (Cat.activity) return Act.activeHint();
   const { tx, ty } = Cat.target();
   const what = whatIsAt(tx, ty);
+  if (what && what.type === 'yarn') return 'E: pacnij kłębek łapką (albo popchnij go, idąc)';
   if (what && Act.hint(what)) return Act.hint(what);
   const bag = Cat.bag;
   const cap = Cat.capacity();
@@ -467,6 +472,7 @@ function update(dt) {
     Cat.update(dt, new Set());
   }
   Act.tick(dt);
+  if (G.state === 'play') Yarn.update(dt);
   updateCamera(dt);
   Sound.update();
 
@@ -520,6 +526,7 @@ function render() {
     ctx.fillStyle = 'rgba(233,139,122,0.28)';
     ctx.fill();
   }
+  Yarn.drawTrail(ctx);
   drawTargetHighlight();
 
   const list = [];
@@ -534,6 +541,7 @@ function render() {
   }
   list.push({ sortY: 5 * T, draw: drawCounter });
   for (const c of G.customers) list.push({ sortY: c.y, draw: () => drawCustomer(ctx, c) });
+  list.push({ sortY: Yarn.y, draw: () => Yarn.draw(ctx) });
   list.push({ sortY: Cat.activity ? Act.sortY() : Cat.y + 0.1, draw: () => Cat.draw(ctx) });
   if (Cat.activity && Cat.activity.type === 'read') list.push({ sortY: Cat.activity.prop.bottom + 0.5, draw: () => Act.drawOverlay(ctx) });
   list.sort((a, b) => a.sortY - b.sortY);
@@ -639,6 +647,14 @@ function drawTargetHighlight() {
   const what = whatIsAt(tx, ty);
   if (!what) return;
   let x, y, w, h;
+  if (what.type === 'yarn') {
+    const a = 0.55 + Math.sin(G.time * 6) * 0.3;
+    ell(ctx, Yarn.x, Yarn.y - YARN_R, YARN_R + 6, YARN_R + 6);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = `rgba(255,250,215,${a})`;
+    ctx.stroke();
+    return;
+  }
   if (what.type === 'bookcase') {
     x = what.bc.tx * T - 3;
     y = (what.bc.ty + 1) * T - BOOKCASE_H - 3;
