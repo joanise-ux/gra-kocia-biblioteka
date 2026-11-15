@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <clipPath id="c"><circle cx="32" cy="32" r="30"/></clipPath>
+    <clipPath id="h"><ellipse cx="32" cy="31" rx="18" ry="15"/></clipPath>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="#fbe2c2"/>
+  <g clip-path="url(#c)" stroke="#6b4a3a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- uszy -->
+    <path d="M15 27 L16 8 L29 18 Z" fill="#3d3434"/>
+    <path d="M49 27 L48 8 L35 18 Z" fill="#f0a04b"/>
+    <path d="M45 22 L45.5 13 L39 18 Z" fill="#f6a8b0" stroke="none"/>
+    <!-- głowa z łatkami -->
+    <ellipse cx="32" cy="31" rx="18" ry="15" fill="#fffaf2"/>
+    <g clip-path="url(#h)" stroke="none">
+      <ellipse cx="19" cy="21" rx="11" ry="9" fill="#3d3434"/>
+      <ellipse cx="46" cy="23" rx="9" ry="9" fill="#f0a04b"/>
+    </g>
+    <ellipse cx="32" cy="31" rx="18" ry="15" fill="none"/>
+    <!-- zamknięte, uśmiechnięte oczy -->
+    <path d="M22.5 31 Q25 28 27.5 31" fill="none" stroke="#4a3330" stroke-width="2.2"/>
+    <path d="M36.5 31 Q39 28 41.5 31" fill="none" stroke="#4a3330" stroke-width="2.2"/>
+    <ellipse cx="21" cy="35.5" rx="3" ry="1.8" fill="#f6a8b0" stroke="none" opacity=".8"/>
+    <ellipse cx="43" cy="35.5" rx="3" ry="1.8" fill="#f6a8b0" stroke="none" opacity=".8"/>
+    <path d="M30.5 34.5 L33.5 34.5 L32 36.2 Z" fill="#e88a98" stroke="none"/>
+    <!-- otwarta książka -->
+    <path d="M7 42 L32 46 L57 42 L57 60 L32 64 L7 60 Z" fill="#8e6cc4"/>
+    <path d="M10 40 Q21 38 32 43 L32 59 Q21 54 10 56 Z" fill="#fff6e8"/>
+    <path d="M54 40 Q43 38 32 43 L32 59 Q43 54 54 56 Z" fill="#fff6e8"/>
+    <path d="M15 45 Q21 44 27 46 M15 49 Q21 48 27 50 M37 46 Q43 44 49 45 M37 50 Q43 48 49 49" fill="none" stroke="#c9b89a" stroke-width="1.6"/>
+    <!-- łapki na książce -->
+    <ellipse cx="18" cy="41" rx="5.5" ry="4" fill="#fffaf2"/>
+    <ellipse cx="46" cy="41" rx="5.5" ry="4" fill="#fffaf2"/>
+  </g>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#6b4a3a" stroke-width="3"/>
+</svg>
