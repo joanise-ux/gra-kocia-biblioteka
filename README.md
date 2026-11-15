@@ -8,6 +8,7 @@ Przytulna gra w przeglądarce. Jesteś trzykolorową kotką, która prowadzi bib
 - **Telefon:** joystick po lewej, przycisk 🐾 po prawej.
 - Dymek gościa pokazuje kolor książki (kategorię) oraz „kup” albo „pożycz”. Nikt się nie spieszy.
 - Na koniec dnia możesz kupić ulepszenia: szybkie łapki, torbę na książki, nowe szafy i półki, większą ladę, przytulny kącik.
+- Kotka bawi się też w sali: podejdź i naciśnij `E` przy fotelu (siada, a po chwili zasypia), przy ścianie z lampkami (łapie je łapką), przy kwiatku (podlewa go, a kwiatek zakwita) albo przy stoliku z książką i świeczką (czyta i przewraca strony). Ruch kończy zabawę.
 - Na mapie świata otwierasz nowe filie. Japonia otwiera się po postawieniu wszystkich szaf w Polskim lesie.
 
 ## Uruchomienie lokalne
@@ -31,6 +32,7 @@ Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework
 - `js/art.js`: grafika rysowana wektorowo na canvasie
 - `js/map.js`: układ sali, szafy, tło
 - `js/player.js`, `js/touch.js`: kotka, klawiatura i sterowanie dotykowe
+- `js/activities.js`: zabawy kotki z otoczeniem (fotel, lampki, kwiatki, czytanie)
 - `js/customers.js`: goście
 - `js/shop.js`, `js/ui.js`: sklep i interfejs
 - `js/audio.js`: dźwięki i muzyka (Web Audio, bez plików)

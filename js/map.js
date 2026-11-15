@@ -161,13 +161,14 @@ function buildWorld() {
   const solid = (tiles) => tiles.forEach(([x, y]) => (SOLID[y][x] = true));
 
   STATIC_PROPS = [
-    { art: 'plantB', x: 10 * T + 2, bottom: 3 * T - 2 },
-    { art: 'plantA', x: 18 * T + 2, bottom: 3 * T - 2 },
-    { art: 'plantC', x: 1 * T + 2, bottom: 12 * T - 2 },
+    // act: zabawa kotki przy meblu (activities.js), tiles: kafle, na które kotka patrzy
+    { art: 'plantB', x: 10 * T + 2, bottom: 3 * T - 2, act: 'plant', tiles: [[10, 2]] },
+    { art: 'plantA', x: 18 * T + 2, bottom: 3 * T - 2, act: 'plant', tiles: [[18, 2]] },
+    { art: 'plantC', x: 1 * T + 2, bottom: 12 * T - 2, act: 'plant', tiles: [[1, 11]] },
     { art: 'lamp', x: 18 * T + 6, bottom: 10 * T - 4 },
-    { art: 'armchair', x: 17 * T - 6, bottom: 11 * T + 4 },
+    { art: 'armchair', x: 17 * T - 6, bottom: 11 * T + 4, act: 'armchair', tiles: [[17, 10]] },
     { art: 'sideTable', x: 18 * T + 6, bottom: 11 * T + 2 },
-    { art: 'readingTable', x: 3 * T - 2, bottom: 10 * T },
+    { art: 'readingTable', x: 3 * T - 2, bottom: 10 * T, act: 'read', tiles: [[3, 9], [4, 9]] },
   ];
   solid([[10, 2], [18, 2], [1, 11], [18, 9], [17, 10], [18, 10], [3, 9], [4, 9]]);
 

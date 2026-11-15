@@ -106,6 +106,7 @@ function beginDay() {
   G.light = G.served / G.goal;
   G.endTimer = -1;
   Cat.reset();
+  Act.reset();
   Camera.x = Camera.y = null;
   G.state = 'play';
   buildWorld();
@@ -234,7 +235,7 @@ function whatIsAt(tx, ty) {
   if (bc) return { type: 'bookcase', bc };
   if (ty === COUNTER_ROW && activeSlotCols().includes(tx)) return { type: 'slot', col: tx, customer: customerAtSlot(tx) };
   if (ty === COUNTER_ROW && tx === RETURN_COL) return { type: 'cart' };
-  return null;
+  return Act.propAt(tx, ty);
 }
 
 function bagFull() {
@@ -292,6 +293,8 @@ function interact() {
   const what = whatIsAt(tx, ty);
   const fx = Cat.x, fy = Cat.y - 90;
   if (!what) return;
+
+  if (['armchair', 'read', 'plant', 'lights'].includes(what.type)) return Act.start(what);
 
   if (what.type === 'bookcase') {
     if (shelveReturns(what.bc)) return;
@@ -369,8 +372,10 @@ function serve(c, i) {
 function hintText() {
   if (G.state !== 'play') return '';
   if (G.picker) return 'Wybierz kategorię: strzałki + E, cyfra albo kliknięcie. Esc zamyka.';
+  if (Cat.activity) return Act.activeHint();
   const { tx, ty } = Cat.target();
   const what = whatIsAt(tx, ty);
+  if (what && Act.hint(what)) return Act.hint(what);
   const bag = Cat.bag;
   const cap = Cat.capacity();
   const bagInfo = cap > 1 ? ` (w torbie ${bag.length}/${cap})` : '';
@@ -448,7 +453,10 @@ function update(dt) {
   G.time += dt;
   if (G.state === 'play') {
     Cat.update(dt, Input.keys);
-    if (Input.consumeAction() && !G.picker) interact();
+    if (Input.consumeAction() && !G.picker) {
+      if (Cat.activity) Act.action();
+      else interact();
+    }
     updateCustomers(dt);
     if (G.spawned >= G.goal && G.customers.every((c) => c.kind !== 'shopper')) {
       if (G.endTimer < 0) G.endTimer = 1.6;
@@ -458,6 +466,7 @@ function update(dt) {
   } else {
     Cat.update(dt, new Set());
   }
+  Act.tick(dt);
   updateCamera(dt);
   Sound.update();
 
@@ -516,7 +525,8 @@ function render() {
   const list = [];
   for (const p of STATIC_PROPS) {
     const a = ART[p.art];
-    list.push({ sortY: p.bottom, draw: () => blit(ctx, a, p.x, p.bottom - a.h) });
+    const draw = p.act === 'plant' ? () => drawPlantProp(ctx, p) : () => blit(ctx, a, p.x, p.bottom - a.h);
+    list.push({ sortY: p.bottom, draw });
   }
   for (const bc of BOOKCASES) {
     const bottom = (bc.ty + 1) * T;
@@ -524,13 +534,15 @@ function render() {
   }
   list.push({ sortY: 5 * T, draw: drawCounter });
   for (const c of G.customers) list.push({ sortY: c.y, draw: () => drawCustomer(ctx, c) });
-  list.push({ sortY: Cat.y + 0.1, draw: () => Cat.draw(ctx) });
+  list.push({ sortY: Cat.activity ? Act.sortY() : Cat.y + 0.1, draw: () => Cat.draw(ctx) });
+  if (Cat.activity && Cat.activity.type === 'read') list.push({ sortY: Cat.activity.prop.bottom + 0.5, draw: () => Act.drawOverlay(ctx) });
   list.sort((a, b) => a.sortY - b.sortY);
   for (const o of list) o.draw();
 
   drawLighting();
   for (const c of G.customers) drawCustomerBubble(ctx, c);
   Cat.drawCarry(ctx);
+  Act.drawEffects(ctx);
   drawParticles();
   drawFloaters();
 }
@@ -632,6 +644,17 @@ function drawTargetHighlight() {
     y = (what.bc.ty + 1) * T - BOOKCASE_H - 3;
     w = 3 * T + 6;
     h = BOOKCASE_H + 6;
+  } else if (what.prop) {
+    const a = ART[what.prop.art];
+    x = what.prop.x - 4;
+    y = what.prop.bottom - a.h - 4;
+    w = a.w + 8;
+    h = a.h + 8;
+  } else if (what.type === 'lights') {
+    x = what.tx * T - 6;
+    y = 4;
+    w = T + 12;
+    h = theme().lights === 'lanterns' ? 50 : 34;
   } else {
     x = tx * T + 2;
     y = 5 * T - COUNTER_H + 32;
@@ -675,13 +698,13 @@ function drawLighting() {
   // girlanda lampek
   const colors = ['#ffd36b', '#ff9e8a', '#9fe0c0', '#a8c8ff'];
   ctx.beginPath();
-  for (let x = 2.2 * T; x < 18.6 * T; x += 4) ctx.lineTo(x, 13 + Math.sin(x * 0.045) * 4 + 4);
+  for (let x = 2.2 * T; x < 18.6 * T; x += 4) ctx.lineTo(x, 13 + Math.sin(x * 0.045) * 4 + 4 + Act.wobble(x) * 0.6);
   ctx.lineWidth = 1.5;
   ctx.strokeStyle = 'rgba(107,74,58,0.6)';
   ctx.stroke();
   for (let i = 0, x = 2.4 * T; x < 18.5 * T; x += 26, i++) {
-    const y = 13 + Math.sin(x * 0.045) * 4 + 9;
-    const on = glow > 0 && Math.sin(G.time * 2 + i) > -0.6;
+    const y = 13 + Math.sin(x * 0.045) * 4 + 9 + Act.wobble(x);
+    const on = (glow > 0 && Math.sin(G.time * 2 + i) > -0.6) || Math.abs(Act.wobble(x)) > 1.5;
     if (on) {
       ell(ctx, x, y, 8, 8);
       ctx.fillStyle = `rgba(255,230,160,${0.3 * glow})`;
@@ -702,7 +725,7 @@ function drawLanterns(glow) {
   ctx.strokeStyle = 'rgba(107,74,58,0.6)';
   ctx.stroke();
   xs.forEach((tx, i) => {
-    const x = tx * T, sway = Math.sin(G.time * 1.2 + i) * 1.5;
+    const x = tx * T, sway = Math.sin(G.time * 1.2 + i) * 1.5 + Act.wobble(x) * 1.4;
     const y = 30;
     ctx.beginPath();
     ctx.moveTo(x, 9);

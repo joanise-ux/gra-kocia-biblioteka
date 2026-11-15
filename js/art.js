@@ -208,8 +208,9 @@ function catHead(g, x, y) {
   ]);
 }
 
-function catFace(g, x, y, blink, happy) {
-  const ey = y - 40;
+function catFace(g, x, y, blink, happy, look) {
+  const ey = y - 40 + (look ? look.y : 0);
+  const lx = look ? look.x : 0;
   if (blink || happy) {
     g.beginPath();
     g.arc(x - 8, ey + 1, 3, Math.PI * 1.1, Math.PI * 1.9);
@@ -220,10 +221,10 @@ function catFace(g, x, y, blink, happy) {
     g.stroke();
   } else {
     for (const sx of [-8, 8]) {
-      ell(g, x + sx, ey, 3, 3.8);
+      ell(g, x + sx + lx, ey, 3, 3.8);
       g.fillStyle = INK;
       g.fill();
-      ell(g, x + sx + 1, ey - 1.4, 1.2, 1.2);
+      ell(g, x + sx + lx + 1, ey - 1.4, 1.2, 1.2);
       g.fillStyle = '#fff';
       g.fill();
     }
@@ -400,7 +401,7 @@ function catSit(g, x, y, o) {
   g.fill();
   catEars(g, x, y + 2);
   catHead(g, x, y + 2);
-  catFace(g, x, y + 2, o.blink || o.purr, false);
+  catFace(g, x, y + 2, o.blink || o.purr, o.happy, o.look);
 }
 
 function catSleep(g, x, y, o) {

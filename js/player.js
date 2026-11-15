@@ -57,6 +57,7 @@ const Cat = {
   blinkT: 2,
   happyT: 0,
   bag: [], // niesione książki: { cat, returned }
+  activity: null, // zabawa z otoczeniem (activities.js)
 
   reset() {
     this.x = CAT_START.x;
@@ -64,6 +65,7 @@ const Cat = {
     this.dir = 'down';
     this.bag = [];
     this.idleT = 0;
+    this.activity = null;
   },
 
   capacity() {
@@ -95,6 +97,12 @@ const Cat = {
     }
     this.moving = vx !== 0 || vy !== 0;
 
+    // zabawa trwa, dopóki kotka się nie ruszy
+    if (this.activity) {
+      if (this.moving) Act.stop();
+      else if (G.state === 'play') Act.update(dt);
+    }
+
     if (this.moving) {
       const len = Math.hypot(vx, vy);
       if (len > 1) {
@@ -122,7 +130,7 @@ const Cat = {
       }
     } else {
       this.walkT = 0;
-      this.idleT += dt;
+      this.idleT = this.activity ? 0 : this.idleT + dt;
     }
 
     this.blinkT -= dt;
@@ -156,6 +164,7 @@ const Cat = {
   },
 
   draw(ctx) {
+    if (this.activity) return Act.drawCat(ctx);
     drawCat(ctx, this.x, this.y, {
       dir: this.dir,
       moving: this.moving,
@@ -170,7 +179,7 @@ const Cat = {
 
   drawCarry(ctx) {
     const n = this.bag.length;
-    if (!n) return;
+    if (!n || this.activity) return;
     const bob = Math.sin(G.time * 4) * 1.5;
     // książki ułożone w wachlarzyk nad głową
     this.bag.forEach((it, i) => {

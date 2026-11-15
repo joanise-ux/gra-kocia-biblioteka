@@ -215,6 +215,24 @@ const Sound = {
       case 'dayEnd':
         [784, 659, 523, 587, 523].forEach((f, i) => this.tone(f, 0.6, { vol: 0.09, when: i * 0.22 }));
         break;
+      case 'page':
+        this.noise(0.16, { freq: 4200, q: 0.6, vol: 0.07 });
+        this.noise(0.12, { freq: 2600, q: 0.7, vol: 0.05, when: 0.1 });
+        break;
+      case 'water':
+        for (let i = 0; i < 7; i++)
+          this.tone(500 + Math.random() * 600, 0.08, { vol: 0.045, when: i * 0.2 + Math.random() * 0.08, slideTo: 900 + Math.random() * 500 });
+        this.noise(1.8, { filter: 'lowpass', freq: 1200, vol: 0.03, attack: 0.2 });
+        break;
+      case 'jingle': {
+        const notes = [1568, 1760, 2093, 2349, 2637];
+        for (let i = 0; i < 3; i++) this.tone(notes[Math.floor(Math.random() * notes.length)], 0.35, { type: 'triangle', vol: 0.045, when: i * 0.06 });
+        break;
+      }
+      case 'sit':
+        this.noise(0.25, { filter: 'lowpass', freq: 500, vol: 0.08, attack: 0.02 });
+        this.tone(392, 0.18, { vol: 0.06, slideTo: 330, when: 0.05 });
+        break;
       case 'sad':
         this.tone(440, 0.3, { vol: 0.06, slideTo: 392 });
         break;
