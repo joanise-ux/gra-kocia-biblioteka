@@ -239,9 +239,14 @@ const Act = {
     p.wig = 1;
     if (!this.watered.has(p.art)) {
       this.watered.add(p.art);
-      addFloat('Kwiatek zakwitł! 🌸', a.px, a.py - 40, '#ffd0e0', 1.8);
+      // nagroda: serduszko za pierwsze podlanie tego kwiatka danego dnia
+      G.hearts++;
+      G.today.hearts++;
+      addFloat('Kwiatek zakwitł! +1 💗', a.px, a.py - 40, '#ffd0e0', 1.8);
       spawnHearts(a.px, a.py - 20, 2);
       Sound.play('purchase');
+      UI.updateHUD();
+      save();
     } else {
       addFloat('Już się napił 💧', a.px, a.py - 40, '#bfe6ff', 1.5);
       Sound.play('pop');
