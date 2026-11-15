@@ -17,6 +17,19 @@ const Input = {
       ArrowRight: 'right', KeyD: 'right',
     };
     window.addEventListener('keydown', (e) => {
+      // mapa świata otwarta w trakcie dnia: kotka czeka, klawisze ją zamykają
+      if (G.state === 'play' && mapIsOpen()) {
+        if (['Escape', 'KeyE', 'Space', 'Enter', 'KeyQ', 'KeyM'].includes(e.code) && !e.repeat) {
+          UI.showMap(false);
+          e.preventDefault();
+        }
+        return;
+      }
+      if (e.code === 'KeyM' && G.state === 'play' && !G.picker && !e.repeat) {
+        Sound.play('open');
+        UI.showMap(true);
+        return;
+      }
       if (G.picker) {
         if (map[e.code] === 'up') Picker.move(-1);
         else if (map[e.code] === 'down') Picker.move(1);

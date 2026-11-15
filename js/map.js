@@ -34,6 +34,9 @@ const SLOT_Y = 4 * T - 2;
 const CAT_BED = { x: 16.3 * T, y: 11.6 * T };
 const CAT_START = { x: 5.5 * T, y: 6.2 * T };
 
+// Mapa świata na prawej ścianie (kotka otwiera ją, stojąc przy ścianie)
+const WALL_MAP = { x: 19 * T + 4, y: 3 * T + 12, w: 36, h: 62, rows: [3, 4] };
+
 const WINDOWS = [
   { x: 3 * T + 4, y: 14, w: 2 * T - 8, h: 58 },
   { x: 6 * T + 4, y: 14, w: 2 * T - 8, h: 58 },
@@ -310,6 +313,7 @@ function drawBackground() {
     g.fillStyle = 'rgba(107,74,58,0.25)';
     g.fillRect(T, 2 * T, 4, 10 * T);
     g.fillRect(19 * T - 4, 2 * T, 4, 10 * T);
+    drawWallMap(g);
 
     // barierka (kolumna 9)
     const rx = 9 * T + 16;
@@ -331,6 +335,68 @@ function drawBackground() {
       g.setLineDash([]);
     }
   });
+}
+
+// Pergaminowa mapa świata w ramce, z trasą między filiami
+function drawWallMap(g) {
+  const { x, y, w, h } = WALL_MAP;
+  // sznurek i gwoździk
+  g.beginPath();
+  g.moveTo(x + 6, y + 4);
+  g.lineTo(x + w / 2, y - 12);
+  g.lineTo(x + w - 6, y + 4);
+  g.lineWidth = 1.5;
+  g.strokeStyle = OL;
+  g.stroke();
+  ell(g, x + w / 2, y - 12, 2.5, 2.5);
+  fs(g, '#f4c542', 1.5);
+  rr(g, x, y, w, h, 5);
+  fs(g, '#c58552', 2.5);
+  rr(g, x + 4, y + 4, w - 8, h - 8, 3);
+  fs(g, '#f6e6c0', 1.5);
+  g.save();
+  rr(g, x + 4, y + 4, w - 8, h - 8, 3);
+  g.clip();
+  g.fillStyle = '#bfe3f0';
+  g.fillRect(x + 4, y + 4, w - 8, h - 8);
+  // lądy
+  ell(g, x + 13, y + 46, 11, 15, 0.3);
+  fs(g, '#9fd08a', 1.5);
+  ell(g, x + 15, y + 50, 5, 6);
+  g.fillStyle = '#6fae5f';
+  g.fill();
+  ell(g, x + 30, y + 18, 6, 11, -0.5);
+  fs(g, '#f0d48a', 1.5);
+  ell(g, x + 31, y + 33, 3, 5, -0.4);
+  fs(g, '#f6b6c8', 1.2);
+  // fale
+  g.strokeStyle = 'rgba(80,140,180,0.6)';
+  g.lineWidth = 1;
+  for (const [wx, wy] of [[x + 9, y + 13], [x + 24, y + 54], [x + 21, y + 34]]) {
+    g.beginPath();
+    g.moveTo(wx, wy);
+    g.quadraticCurveTo(wx + 2.5, wy - 2.5, wx + 5, wy);
+    g.quadraticCurveTo(wx + 7.5, wy + 2.5, wx + 10, wy);
+    g.stroke();
+  }
+  // trasa
+  g.setLineDash([3, 3]);
+  g.beginPath();
+  g.moveTo(x + 15, y + 44);
+  g.quadraticCurveTo(x + 22, y + 22, x + 31, y + 32);
+  g.lineWidth = 1.6;
+  g.strokeStyle = '#d9534f';
+  g.stroke();
+  g.setLineDash([]);
+  g.restore();
+  // pinezki
+  for (const [px, py, c] of [[x + 15, y + 44, '#e2675f'], [x + 31, y + 32, '#f6a8c8']]) {
+    ell(g, px, py - 3, 3, 3);
+    fs(g, c, 1.3);
+  }
+  // róża wiatrów
+  ell(g, x + 11, y + 15, 3.5, 3.5);
+  fs(g, '#fff6e8', 1.2);
 }
 
 function drawWindow(g, w, R) {

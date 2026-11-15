@@ -24,6 +24,7 @@ const Act = {
   propAt(tx, ty) {
     const p = STATIC_PROPS.find((p) => p.act && p.tiles.some(([x, y]) => x === tx && y === ty));
     if (p) return { type: p.act, prop: p };
+    if (tx === 19 && WALL_MAP.rows.includes(ty)) return { type: 'worldmap' };
     // ściana z lampkami za szafami (kotka stoi tuż pod nią)
     if (ty === 1 && tx >= 10 && tx <= 18) return { type: 'lights', tx };
     return null;
@@ -40,6 +41,8 @@ const Act = {
         return this.watered.has(what.prop.art) ? 'E: podlej kwiatek jeszcze raz' : 'E: podlej kwiatek';
       case 'lights':
         return jp ? 'E: pobaw się lampionami' : 'E: spróbuj złapać lampki łapką';
+      case 'worldmap':
+        return 'E: obejrzyj mapę świata';
     }
     return '';
   },

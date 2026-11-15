@@ -298,6 +298,10 @@ function interact() {
   if (!what) return;
 
   if (what.type === 'yarn') return Yarn.bat();
+  if (what.type === 'worldmap') {
+    Sound.play('open');
+    return UI.showMap(true);
+  }
   if (['armchair', 'read', 'plant', 'lights'].includes(what.type)) return Act.start(what);
 
   if (what.type === 'bookcase') {
@@ -373,8 +377,13 @@ function serve(c, i) {
   save();
 }
 
+function mapIsOpen() {
+  return !document.getElementById('overlay-map').hidden;
+}
+
 function hintText() {
   if (G.state !== 'play') return '';
+  if (mapIsOpen()) return 'E albo Esc: zamknij mapę';
   if (G.picker) return 'Wybierz kategorię: strzałki + E, cyfra albo kliknięcie. Esc zamyka.';
   if (Cat.activity) return Act.activeHint();
   const { tx, ty } = Cat.target();
@@ -456,9 +465,12 @@ function updateCamera(dt) {
 
 function update(dt) {
   G.time += dt;
+  const mapOpen = mapIsOpen();
   if (G.state === 'play') {
-    Cat.update(dt, Input.keys);
-    if (Input.consumeAction() && !G.picker) {
+    Cat.update(dt, mapOpen ? new Set() : Input.keys);
+    if (mapOpen) {
+      if (Input.consumeAction()) UI.showMap(false);
+    } else if (Input.consumeAction() && !G.picker) {
       if (Cat.activity) Act.action();
       else interact();
     }
@@ -666,6 +678,11 @@ function drawTargetHighlight() {
     y = what.prop.bottom - a.h - 4;
     w = a.w + 8;
     h = a.h + 8;
+  } else if (what.type === 'worldmap') {
+    x = WALL_MAP.x - 4;
+    y = WALL_MAP.y - 16;
+    w = WALL_MAP.w + 8;
+    h = WALL_MAP.h + 20;
   } else if (what.type === 'lights') {
     x = what.tx * T - 6;
     y = 4;
