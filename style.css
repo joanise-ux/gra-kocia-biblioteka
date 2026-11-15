@@ -411,3 +411,10 @@ body.touch .keys-desktop { display: none; }
 
 .r-req { font-size: 12px !important; font-weight: 600; color: #b8572a !important; }
 .r-req.done { color: #4f8a4a !important; }
+
+/* karta stałych klientów */
+.loyal-card { max-width: 640px; }
+#loyal-list { list-style: none; padding: 12px 2px 2px; margin: 0 0 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 10px; text-align: left; max-height: 52vh; overflow-y: auto; }
+@media (max-width: 520px) { #loyal-list { grid-template-columns: 1fr; max-height: none; } .loyal-card h1 { font-size: 26px; } }
+#loyal-list .pips { font-size: 13px; margin-left: 4px; }
+#loyal-list li.empty { grid-column: 1 / -1; text-align: center; color: var(--muted); border: 2px dashed var(--line); border-radius: 14px; padding: 14px; }

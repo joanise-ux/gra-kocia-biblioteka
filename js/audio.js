@@ -233,6 +233,10 @@ const Sound = {
         this.noise(0.25, { filter: 'lowpass', freq: 500, vol: 0.08, attack: 0.02 });
         this.tone(392, 0.18, { vol: 0.06, slideTo: 330, when: 0.05 });
         break;
+      case 'pour':
+        this.noise(0.5, { filter: 'bandpass', freq: 1400, q: 1.5, vol: 0.06, attack: 0.05 });
+        this.tone(880, 0.12, { vol: 0.04, when: 0.45, type: 'triangle' });
+        break;
       case 'boing':
         this.tone(330, 0.18, { type: 'triangle', vol: 0.08, slideTo: 620 });
         this.noise(0.06, { freq: 900, vol: 0.05 });

@@ -245,6 +245,23 @@ function whatIsAt(tx, ty) {
   return Act.propAt(tx, ty);
 }
 
+// Herbatka dla czytelnika: czyta dłużej i zostawia większy napiwek
+function serveTea(c) {
+  Cat.tea = false;
+  c.tea = true;
+  c.readFor += 10;
+  c.say = { text: pick(['Herbatka! Dziękuję, {imie}!', 'Mmm, z miodem!', 'Jak w domu ☕']), t: 1.8 };
+  const v = visitsOf(c.name);
+  if (v) v.teas = (v.teas || 0) + 1;
+  G.hearts++;
+  G.today.hearts++;
+  spawnHearts(c.x, c.y - 80, 2);
+  Sound.play('cash');
+  UI.updateHUD();
+  G.panelDirty = true;
+  save();
+}
+
 // Czytelnik w fotelu tuż przed kotką
 function readerFacing() {
   if (Cat.activity) return null;
@@ -313,6 +330,7 @@ function interact() {
   if (what.type === 'reader') {
     const c = what.customer;
     c.happyT = 0.6;
+    if (Cat.tea && !c.tea) return serveTea(c);
     if (!c.petted) {
       c.petted = true;
       c.say = { text: 'Mrr, miło cię widzieć, {imie}!', t: 1.8 };
@@ -326,6 +344,18 @@ function interact() {
       Sound.play('click');
     }
     return;
+  }
+  if (what.type === 'tea') {
+    if (Cat.tea) return addFloat('Łapki zajęte herbatką ☕', fx, fy, '#ffe2c0');
+    Cat.tea = true;
+    Sound.play('pour');
+    addFloat('Herbatka ☕', fx, fy, '#ffe2c0');
+    G.panelDirty = true;
+    return;
+  }
+  if (what.type === 'cards') {
+    Sound.play('open');
+    return UI.showLoyal(true);
   }
   if (what.type === 'worldmap') {
     Sound.play('open');
@@ -413,17 +443,25 @@ function serve(c, i) {
   save();
 }
 
-function mapIsOpen() {
-  return !document.getElementById('overlay-map').hidden;
+// Okienko (mapa świata albo karta stałych klientów) otwarte w trakcie dnia
+function overlayIsOpen() {
+  return !document.getElementById('overlay-map').hidden || !document.getElementById('overlay-loyal').hidden;
+}
+function closeOverlays() {
+  UI.showMap(false);
+  UI.showLoyal(false);
 }
 
 function hintText() {
   if (G.state !== 'play') return '';
-  if (mapIsOpen()) return 'E albo Esc: zamknij mapę';
+  if (overlayIsOpen()) return 'E albo Esc: zamknij';
   if (G.picker) return 'Wybierz kategorię: strzałki + E, cyfra albo kliknięcie. Esc zamyka.';
   if (Cat.activity) return Act.activeHint();
   const { tx, ty } = Cat.target();
   const what = whatIsAt(tx, ty);
+  if (what && what.type === 'reader' && Cat.tea && !what.customer.tea) return `E: podaj herbatkę (${what.customer.name}) ☕`;
+  if (what && what.type === 'reader' && what.customer.petted && !what.customer.tea)
+    return `${what.customer.name} chętnie napije się herbatki. Weź ją z wózka ☕`;
   if (what && what.type === 'reader')
     return what.customer.petted ? `${what.customer.name} czyta w spokoju 📖` : `E: przywitaj się z gościem (${what.customer.name}) 💗`;
   if (what && what.type === 'yarn') return 'E: pacnij kłębek łapką (albo popchnij go, idąc)';
@@ -503,11 +541,11 @@ function updateCamera(dt) {
 
 function update(dt) {
   G.time += dt;
-  const mapOpen = mapIsOpen();
+  const ovOpen = overlayIsOpen();
   if (G.state === 'play') {
-    Cat.update(dt, mapOpen ? new Set() : Input.keys);
-    if (mapOpen) {
-      if (Input.consumeAction()) UI.showMap(false);
+    Cat.update(dt, ovOpen ? new Set() : Input.keys);
+    if (ovOpen) {
+      if (Input.consumeAction()) closeOverlays();
     } else if (Input.consumeAction() && !G.picker) {
       if (Cat.activity) Act.action();
       else interact();

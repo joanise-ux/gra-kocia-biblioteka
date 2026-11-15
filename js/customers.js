@@ -54,7 +54,7 @@ function roomPath(seat) {
     { x: 19.5 * T, y: doorY },
   ];
   if (s.ty < ROOM_DOOR_ROWS[0]) p.push({ x: s.sx, y: doorY }, { x: s.sx, y: s.sy });
-  else p.push({ x: 20.3 * T, y: doorY }, { x: 20.3 * T, y: 10.9 * T }, { x: s.sx, y: 10.9 * T }, { x: s.sx, y: s.sy });
+  else p.push({ x: 20.3 * T, y: doorY }, { x: 20.3 * T, y: 10.55 * T }, { x: s.sx, y: 10.55 * T }, { x: s.sx, y: s.sy });
   return p;
 }
 function sendToRoom(c, seat, from) {
@@ -66,6 +66,7 @@ function sendToRoom(c, seat, from) {
   c.path = [...from, ...roomPath(seat)];
   c.readFor = 18 + Math.random() * 12;
   c.petted = false;
+  c.tea = false;
   G.panelDirty = true;
 }
 function leaveRoom(c) {
@@ -93,7 +94,7 @@ function spawnReader() {
 }
 function readerTip(c) {
   const b = branch();
-  const n = 4 + b.cozy * 2;
+  const n = 4 + b.cozy * 2 + (c.tea ? 6 : 0);
   G.today.tips += n;
   addCoins(n, c.x, c.y - 100);
   G.hearts++;
@@ -340,7 +341,10 @@ function drawCustomer(ctx, c) {
     happy: c.state === 'happy',
     wave: c.state === 'wait' && c.t < 1.2,
   });
-  if (c.state === 'reading') drawReaderBook(ctx, c.x, c.y - 26 + bob, c.t);
+  if (c.state === 'reading') {
+    drawReaderBook(ctx, c.x, c.y - 26 + bob, c.t);
+    if (c.tea) drawTeaCup(ctx, c.x + 24, c.y - 22, 0.8);
+  }
   if (isLoyal(c.name)) drawStar(ctx, c.x - 20, c.y - 62 + bob, 6.5);
   if (c.kind === 'returner' && (c.state === 'enter' || c.state === 'drop')) {
     drawBookIcon(ctx, c.x + 15, c.y - 20 + bob, CATEGORIES[c.book.cat].color, 1);
@@ -414,6 +418,14 @@ function drawCustomerBubble(ctx, c) {
   const bottom = c.y - 78 - lift;
   if (c.say) {
     drawSpeech(ctx, c.say.text, cx, bottom);
+    return;
+  }
+  if (c.state === 'reading' && !c.tea && c.t > 3) {
+    // dymek: czytelnik ma ochotę na herbatkę
+    const w = 30, h = 28;
+    const by = c.y - 108 + Math.sin(G.time * 2 + c.id) * 1.5;
+    bubbleBox(ctx, cx - w / 2, by, w, h, cx);
+    drawTeaCup(ctx, cx - 1, by + 16, 0.85, false);
     return;
   }
   if (c.state !== 'wait') return;

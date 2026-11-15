@@ -43,6 +43,10 @@ const Act = {
         return jp ? 'E: pobaw się lampionami' : 'E: spróbuj złapać lampki łapką';
       case 'worldmap':
         return 'E: obejrzyj mapę świata';
+      case 'tea':
+        return Cat.tea ? 'Masz już herbatkę. Zanieś ją czytelnikowi ☕' : 'E: nalej herbatki dla czytelnika ☕';
+      case 'cards':
+        return 'E: otwórz kartę stałych klientów ⭐';
     }
     return '';
   },

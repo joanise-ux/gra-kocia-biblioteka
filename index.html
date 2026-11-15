@@ -27,6 +27,7 @@
         <span class="hud-right">
           <button id="btn-music" class="hud-btn icon" type="button" aria-label="Muzyka">🎵</button>
           <button id="btn-sfx" class="hud-btn icon" type="button" aria-label="Efekty dźwiękowe">🔊</button>
+          <button id="btn-loyal" class="hud-btn" type="button">⭐ Stali</button>
           <button id="btn-map" class="hud-btn" type="button">🗺️ Mapa</button>
         </span>
       </div>
@@ -64,7 +65,7 @@
                 <button id="btn-new-no" type="button" class="secondary">Nie</button>
               </div>
             </div>
-            <p class="keys keys-desktop"><kbd>WASD</kbd>/<kbd>strzałki</kbd> chodzenie · <kbd>E</kbd>/<kbd>Spacja</kbd> akcja · <kbd>M</kbd> mapa</p>
+            <p class="keys keys-desktop"><kbd>WASD</kbd>/<kbd>strzałki</kbd> chodzenie · <kbd>E</kbd>/<kbd>Spacja</kbd> akcja · <kbd>M</kbd> mapa · <kbd>K</kbd> stali klienci</p>
             <p class="keys keys-touch">Joystick po lewej: chodzenie · 🐾 po prawej: akcja</p>
             <p class="keys">🎵 Gra ma muzykę i dźwięki. Wyciszysz je przyciskami u góry.</p>
           </div>
@@ -88,6 +89,15 @@
               <button id="btn-map-sum" type="button" class="secondary">🗺️ Mapa świata</button>
               <button id="btn-next" type="button">Następny dzień →</button>
             </div>
+          </div>
+        </div>
+
+        <div id="overlay-loyal" class="overlay" hidden>
+          <div class="card loyal-card">
+            <h1>⭐ Karta stałych klientów</h1>
+            <p id="loyal-sub" class="sub"></p>
+            <ul id="loyal-list"></ul>
+            <div class="buttons"><button id="btn-loyal-close" type="button">Zamknij</button></div>
           </div>
         </div>
 

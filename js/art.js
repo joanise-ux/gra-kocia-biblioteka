@@ -932,6 +932,100 @@ function makeCatBedArt() {
   });
 }
 
+/* ---------- czytelnia: wózek z herbatą, kartoteka, filiżanka ---------- */
+function drawTeaCup(g, x, y, s = 1, steam = true) {
+  g.save();
+  g.translate(x, y);
+  g.scale(s, s);
+  if (steam) {
+    const t = typeof G !== 'undefined' ? G.time : 0;
+    g.strokeStyle = 'rgba(255,255,255,0.85)';
+    g.lineWidth = 1.6;
+    for (const k of [-2.5, 2.5]) {
+      g.beginPath();
+      g.moveTo(k, -7);
+      g.quadraticCurveTo(k + 3 * Math.sin(t * 3 + k), -11, k, -15);
+      g.stroke();
+    }
+  }
+  ell(g, 7, 0, 3.5, 3.5);
+  g.lineWidth = 2;
+  g.strokeStyle = OL;
+  g.stroke();
+  rr(g, -7, -5, 14, 10, [1, 1, 5, 5]);
+  fs(g, '#fff6e8', 1.8);
+  ell(g, 0, -4.5, 6, 1.6);
+  g.fillStyle = '#b5713f';
+  g.fill();
+  g.fillStyle = '#f27a94';
+  g.fillRect(-5, 0, 10, 2);
+  ell(g, 0, 6, 10, 2.5);
+  fs(g, '#fff6e8', 1.5);
+  g.restore();
+}
+
+function makeTeaCartArt() {
+  return makeArt(46, 56, (g) => {
+    // kółka i nóżki
+    rr(g, 6, 30, 4, 20, 2);
+    fs(g, '#8a5434', 2);
+    rr(g, 36, 30, 4, 20, 2);
+    fs(g, '#8a5434', 2);
+    rr(g, 3, 40, 40, 6, 3);
+    fs(g, '#c58552', 2);
+    for (const x of [8, 38]) {
+      ell(g, x, 51, 4, 4);
+      fs(g, '#6b4a3a', 1.5);
+    }
+    rr(g, 1, 26, 44, 8, 4);
+    fs(g, '#c58552', 2.5);
+    // dzbanek
+    ell(g, 15, 18, 9, 8);
+    fs(g, '#f6a8b0', 2.5);
+    g.beginPath();
+    g.moveTo(23, 16);
+    g.lineTo(29, 10);
+    g.lineWidth = 3.5;
+    g.strokeStyle = OL;
+    g.stroke();
+    ell(g, 15, 10, 4, 1.8);
+    fs(g, '#f6a8b0', 1.5);
+    ell(g, 15, 8, 1.8, 1.8);
+    fs(g, '#fff6e8', 1.2);
+    g.fillStyle = 'rgba(255,255,255,0.6)';
+    g.fillRect(10, 15, 2, 5);
+    // filiżanki
+    drawTeaCup(g, 34, 20, 0.75, false);
+  });
+}
+
+// Szafka z szufladkami kart czytelników
+function makeCardFileArt() {
+  return makeArt(46, 60, (g) => {
+    rr(g, 3, 6, 40, 50, 6);
+    fs(g, '#b9784a', 3);
+    for (let r = 0; r < 3; r++)
+      for (let c = 0; c < 2; c++) {
+        const x = 7 + c * 17, y = 11 + r * 14;
+        rr(g, x, y, 15, 11, 2.5);
+        fs(g, '#e6a46c', 2);
+        rr(g, x + 4, y + 2.5, 7, 3.5, 1);
+        g.fillStyle = '#fff6e8';
+        g.fill();
+        ell(g, x + 7.5, y + 8, 1.6, 1.6);
+        g.fillStyle = OL;
+        g.fill();
+      }
+    rr(g, 0, 2, 46, 8, 4);
+    fs(g, '#a96a3f', 2.5);
+    // karteczki wystające z góry i gwiazdka
+    rr(g, 10, -2, 10, 7, 1);
+    fs(g, '#fff6e8', 1.5);
+    rr(g, 24, -1, 9, 6, 1);
+    fs(g, '#cfe6f7', 1.5);
+  });
+}
+
 /* ---------- meble japońskie ---------- */
 function drawManekiNeko(g, x, y) {
   ell(g, x, y - 9, 9, 10);

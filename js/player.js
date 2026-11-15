@@ -18,16 +18,17 @@ const Input = {
     };
     window.addEventListener('keydown', (e) => {
       // mapa świata otwarta w trakcie dnia: kotka czeka, klawisze ją zamykają
-      if (G.state === 'play' && mapIsOpen()) {
-        if (['Escape', 'KeyE', 'Space', 'Enter', 'KeyQ', 'KeyM'].includes(e.code) && !e.repeat) {
-          UI.showMap(false);
+      if (G.state === 'play' && overlayIsOpen()) {
+        if (['Escape', 'KeyE', 'Space', 'Enter', 'KeyQ', 'KeyM', 'KeyK'].includes(e.code) && !e.repeat) {
+          closeOverlays();
           e.preventDefault();
         }
         return;
       }
-      if (e.code === 'KeyM' && G.state === 'play' && !G.picker && !e.repeat) {
+      if ((e.code === 'KeyM' || e.code === 'KeyK') && G.state === 'play' && !G.picker && !e.repeat) {
         Sound.play('open');
-        UI.showMap(true);
+        if (e.code === 'KeyM') UI.showMap(true);
+        else UI.showLoyal(true);
         return;
       }
       if (G.picker) {
@@ -71,6 +72,7 @@ const Cat = {
   happyT: 0,
   bag: [], // niesione książki: { cat, returned }
   activity: null, // zabawa z otoczeniem (activities.js)
+  tea: false, // filiżanka herbaty dla czytelnika
 
   reset() {
     this.x = CAT_START.x;
@@ -79,6 +81,7 @@ const Cat = {
     this.bag = [];
     this.idleT = 0;
     this.activity = null;
+    this.tea = false;
   },
 
   capacity() {
@@ -192,8 +195,9 @@ const Cat = {
 
   drawCarry(ctx) {
     const n = this.bag.length;
-    if (!n || this.activity) return;
+    if (this.activity) return;
     const bob = Math.sin(G.time * 4) * 1.5;
+    if (this.tea) drawTeaCup(ctx, this.x + (n ? -14 - n * 7 : 0), this.y - 74 + bob, 1.15);
     // książki ułożone w wachlarzyk nad głową
     this.bag.forEach((it, i) => {
       const off = (i - (n - 1) / 2) * 15;

@@ -108,6 +108,8 @@ const UI = {
     $('btn-continue').addEventListener('click', () => startGame(true));
     $('btn-next').addEventListener('click', () => nextDay());
     $('btn-map').addEventListener('click', () => this.showMap(true));
+    $('btn-loyal').addEventListener('click', () => this.showLoyal(true));
+    $('btn-loyal-close').addEventListener('click', () => this.showLoyal(false));
     $('btn-map-sum').addEventListener('click', () => this.showMap(true));
     $('btn-map-close').addEventListener('click', () => this.showMap(false));
     $('map-list').addEventListener('click', (e) => {
@@ -183,6 +185,36 @@ const UI = {
     $('overlay-title').hidden = true;
     $('overlay-summary').hidden = true;
     $('overlay-map').hidden = true;
+    $('overlay-loyal').hidden = true;
+  },
+
+  // Karta stałych klientów bieżącej filii
+  showLoyal(show) {
+    $('overlay-loyal').hidden = !show;
+    if (!show) return;
+    const b = branch();
+    const all = Object.entries(b.visits || {}).sort((a, z) => z[1].n - a[1].n || a[0].localeCompare(z[0], 'pl'));
+    const loyal = all.filter(([, v]) => v.n >= LOYAL_AT).length;
+    $('loyal-sub').textContent =
+      `${region().emoji} ${region().name}: stałych klientów ${loyal}. Gość dostaje ⭐ po ${LOYAL_AT} obsłużonych wizytach.` +
+      (b.reading ? ' Stali klienci mogą wejść do czytelni.' : ' Czytelnię dla nich kupisz w sklepie na koniec dnia.');
+    $('loyal-list').innerHTML = all.length
+      ? all
+          .map(([name, v]) => {
+            const star = v.n >= LOYAL_AT;
+            const pips = star ? '' : `<span class="pips">${'●'.repeat(v.n)}${'○'.repeat(LOYAL_AT - v.n)}</span>`;
+            const favs = SPECIES[v.species].fav.map((c) => CATEGORIES[c].name).join(', ');
+            return `<li class="region ${star ? 'active' : ''}">
+              <div class="r-emoji">${SPECIES[v.species].emoji}</div>
+              <div class="r-body"><b>${name}</b>
+                <p>Wizyty: ${v.n}${pips}</p>
+                <p>Lubi: ${favs}</p>
+                ${v.teas ? `<p>☕ Wypite herbatki: ${v.teas}</p>` : ''}</div>
+              <span class="r-tag">${star ? '⭐ Stały klient' : `jeszcze ${LOYAL_AT - v.n}`}</span>
+            </li>`;
+          })
+          .join('')
+      : '<li class="empty">Jeszcze nikogo tu nie ma. Obsługuj gości, a pojawią się na karcie! 🐾</li>';
   },
 
   showSummary() {
@@ -255,7 +287,9 @@ const UI = {
       const star = isLoyal(c.name) ? ' ⭐' : '';
       if (c.kind === 'reader') {
         items.push(`<li class="${c.state === 'reading' ? '' : 'pending'}"><div class="who">${emoji} ${c.name}${star}</div>
-          <div class="what">${c.state === 'reading' ? '📖 czyta w czytelni' : 'idzie do czytelni'}</div></li>`);
+          <div class="what">${
+          c.state !== 'reading' ? 'idzie do czytelni' : c.tea ? '📖 czyta, pije herbatkę ☕' : c.t > 3 ? '📖 czyta i ma ochotę na herbatkę ☕' : '📖 czyta w czytelni'
+        }</div></li>`);
         continue;
       }
       if (c.kind === 'shopper') {
@@ -286,7 +320,8 @@ const UI = {
             }</span>`;
           })
           .join('')
-      : `<i>${cap > 1 ? 'Torba pusta' : 'Nic, łapki wolne'}</i>`;
+      : Cat.tea ? '' : `<i>${cap > 1 ? 'Torba pusta' : 'Nic, łapki wolne'}</i>`;
+    if (Cat.tea) $('carry').innerHTML += '<span class="bag-item">☕ Herbatka dla czytelnika</span>';
 
     const b = branch();
     $('stock').innerHTML = availableCats()

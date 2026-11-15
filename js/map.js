@@ -176,6 +176,8 @@ function buildArt() {
     lamp: jp ? makeAndonArt() : makeFloorLampArt(),
     sideTable: jp ? makeTeaTrayArt() : makeSideTableArt(),
     readingTable: jp ? makeChabudaiArt() : makeReadingTableArt(),
+    teaCart: jp ? makeTeaTrayArt() : makeTeaCartArt(),
+    cardFile: makeCardFileArt(),
     plantD: theme().plant === 'bamboo' ? makeBambooArt(31, true) : makePlantArt(31, true),
     roomCase: makeBookcaseArt(
       ['fantasy', 'poetry', 'history', 'nature', 'romance'].map((cat) => ({ cat, count: BOOKS_PER_SHELF })),
@@ -210,9 +212,11 @@ function buildWorld() {
     STATIC_PROPS.push(
       { art: 'lamp', x: 20 * T + 6, bottom: 3 * T - 4 },
       { art: 'roomCase', x: 21 * T, bottom: 3 * T },
-      { art: 'plantD', x: 25 * T + 2, bottom: 3 * T - 2, act: 'plant', tiles: [[25, 2]] }
+      { art: 'plantD', x: 25 * T + 2, bottom: 3 * T - 2, act: 'plant', tiles: [[25, 2]] },
+      { art: 'teaCart', x: 25 * T + 1, bottom: 12 * T - 4, act: 'tea', tiles: [[25, 11]] },
+      { art: 'cardFile', x: 20 * T + 1, bottom: 12 * T - 4, act: 'cards', tiles: [[20, 11]] }
     );
-    solid([[20, 2], [21, 2], [22, 2], [23, 2], [25, 2]]);
+    solid([[20, 2], [21, 2], [22, 2], [23, 2], [25, 2], [25, 11], [20, 11]]);
     for (const s of READ_SEATS) {
       STATIC_PROPS.push({ art: 'armchair', x: s.x, bottom: s.bottom });
       solid([[s.tx, s.ty]]);
