@@ -11,7 +11,7 @@ const SOLD_OUT = ['Wszystkie wyszły? Wrócę jutro!', 'Nic nie szkodzi, wpadnę
 
 const READER_LINES = ['Cudowna cisza…', 'Jeszcze jeden rozdział!', 'Ach, jak tu miło.', 'Mrr… znaczy, hmm.'];
 const READER_BYE = ['Dziękuję za czytelnię, {imie}!', 'Wrócę jutro poczytać!', 'Najlepsze miejsce w lesie!'];
-const LOYAL_AT = 3; // tylu obsłużonych wizyt trzeba, żeby zostać stałym klientem
+const LOYAL_AT = 5; // tylu obsłużonych wizyt trzeba, żeby zostać stałym klientem
 
 let _custId = 0;
 

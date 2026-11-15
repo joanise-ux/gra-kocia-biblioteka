@@ -202,12 +202,13 @@ const UI = {
       ? all
           .map(([name, v]) => {
             const star = v.n >= LOYAL_AT;
-            const pips = star ? '' : `<span class="pips">${'●'.repeat(v.n)}${'○'.repeat(LOYAL_AT - v.n)}</span>`;
+            const n = Math.min(v.n, LOYAL_AT);
+            const pips = `<span class="stars">${'★'.repeat(n)}${'☆'.repeat(LOYAL_AT - n)}</span>`;
             const favs = SPECIES[v.species].fav.map((c) => CATEGORIES[c].name).join(', ');
             return `<li class="region ${star ? 'active' : ''}">
               <div class="r-emoji">${SPECIES[v.species].emoji}</div>
               <div class="r-body"><b>${name}</b>
-                <p>Wizyty: ${v.n}${pips}</p>
+                <p>${pips} Wizyty: ${v.n}</p>
                 <p>Lubi: ${favs}</p>
                 ${v.teas ? `<p>☕ Wypite herbatki: ${v.teas}</p>` : ''}</div>
               <span class="r-tag">${star ? '⭐ Stały klient' : `jeszcze ${LOYAL_AT - v.n}`}</span>

@@ -42,7 +42,7 @@ const UPGRADES = {
   speed: { name: 'Szybkie łapki', icon: '🐾', prices: [60, 140, 260], desc: '{kot} chodzi szybciej.' },
   bag: { name: 'Torba na książki', icon: '👜', prices: [80, 200], desc: 'Kotka nosi więcej książek naraz i obsługuje kilku gości za jednym kursem.' },
   counter: { name: 'Większa lada', icon: '🛎️', prices: [180], desc: 'Jeszcze jedno miejsce dla gościa i więcej gości każdego dnia.' },
-  reading: { name: 'Czytelnia', icon: '⭐', prices: [300], desc: 'Pokój z fotelami za prawą ścianą. Wchodzą tu tylko stali klienci (⭐ po 3 wizytach): czytają w spokoju i zostawiają napiwek.' },
+  reading: { name: 'Czytelnia', icon: '⭐', prices: [300], desc: 'Pokój z fotelami za prawą ścianą. Wchodzą tu tylko stali klienci (⭐ po 5 wizytach): czytają w spokoju i zostawiają napiwek.' },
   cozy: { name: 'Przytulny kącik', icon: '🛋️', prices: [100, 220], desc: 'Zadowoleni goście zostawiają większe napiwki.' },
 };
 

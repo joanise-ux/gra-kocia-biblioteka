@@ -418,3 +418,4 @@ body.touch .keys-desktop { display: none; }
 @media (max-width: 520px) { #loyal-list { grid-template-columns: 1fr; max-height: none; } .loyal-card h1 { font-size: 26px; } }
 #loyal-list .pips { font-size: 13px; margin-left: 4px; }
 #loyal-list li.empty { grid-column: 1 / -1; text-align: center; color: var(--muted); border: 2px dashed var(--line); border-radius: 14px; padding: 14px; }
+#loyal-list .stars { color: #e0a520; letter-spacing: 1px; font-size: 15px; }
