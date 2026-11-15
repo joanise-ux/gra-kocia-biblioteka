@@ -252,12 +252,18 @@ const UI = {
     for (const c of G.customers) {
       if (c.leaving || c.state === 'happy' || c.state === 'sad') continue;
       const emoji = SPECIES[c.species].emoji;
+      const star = isLoyal(c.name) ? ' ⭐' : '';
+      if (c.kind === 'reader') {
+        items.push(`<li class="${c.state === 'reading' ? '' : 'pending'}"><div class="who">${emoji} ${c.name}${star}</div>
+          <div class="what">${c.state === 'reading' ? '📖 czyta w czytelni' : 'idzie do czytelni'}</div></li>`);
+        continue;
+      }
       if (c.kind === 'shopper') {
         const r = c.request;
         const g = CATEGORIES[r.cat];
         const arrived = c.state === 'wait';
         items.push(`<li class="${arrived ? '' : 'pending'}">
-          <div class="who">${emoji} ${c.name}${arrived ? '' : ' <i>(idzie do lady)</i>'}</div>
+          <div class="who">${emoji} ${c.name}${star}${arrived ? '' : ' <i>(idzie do lady)</i>'}</div>
           <div class="what"><span class="mode ${r.mode}">${r.mode === 'buy' ? 'KUPNO' : 'WYPOŻYCZENIE'}</span>
           <span class="chip" style="background:${g.color}"></span>${g.name}</div>
           <div class="title">„${r.title}”</div></li>`);

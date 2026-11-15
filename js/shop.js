@@ -37,6 +37,11 @@ const Shop = {
       price: UPGRADES.counter.prices[cl] ?? null,
     });
     list.push({
+      id: 'reading', icon: UPGRADES.reading.icon, name: UPGRADES.reading.name, desc: UPGRADES.reading.desc,
+      level: b.reading ? `Otwarta · stałych klientów: ${loyalCount()}` : `Stałych klientów: ${loyalCount()}`,
+      price: b.reading ? null : UPGRADES.reading.prices[0],
+    });
+    list.push({
       id: 'cozy', icon: UPGRADES.cozy.icon, name: UPGRADES.cozy.name, desc: UPGRADES.cozy.desc,
       level: `Poziom ${b.cozy}/${UPGRADES.cozy.prices.length}`,
       price: UPGRADES.cozy.prices[b.cozy] ?? null,
@@ -63,6 +68,10 @@ const Shop = {
     if (id === 'bag') G.upgrades.bag = (G.upgrades.bag || 0) + 1;
     if (id === 'counter') b.slots++;
     if (id === 'cozy') b.cozy++;
+    if (id === 'reading') {
+      b.reading = true;
+      buildWorld();
+    }
     if (id === 'bookcase') {
       const set = BOOKCASE_SETS[b.bookcases];
       b.bookcases++;

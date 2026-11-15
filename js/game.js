@@ -105,6 +105,8 @@ function beginDay() {
   G.spawnTimer = 1.2;
   G.light = G.served / G.goal;
   G.endTimer = -1;
+  G.readerTimer = 10;
+  G.gateOpen = 0;
   Cat.reset();
   Act.reset();
   Yarn.reset();
@@ -234,11 +236,21 @@ function addCoins(n, x, y) {
 function whatIsAt(tx, ty) {
   const yarn = Yarn.facing();
   if (yarn) return yarn;
+  const reader = readerFacing();
+  if (reader) return { type: 'reader', customer: reader };
   const bc = bookcaseAt(tx, ty);
   if (bc) return { type: 'bookcase', bc };
   if (ty === COUNTER_ROW && activeSlotCols().includes(tx)) return { type: 'slot', col: tx, customer: customerAtSlot(tx) };
   if (ty === COUNTER_ROW && tx === RETURN_COL) return { type: 'cart' };
   return Act.propAt(tx, ty);
+}
+
+// Czytelnik w fotelu tuż przed kotką
+function readerFacing() {
+  if (Cat.activity) return null;
+  const [dx, dy] = DIRS[Cat.dir];
+  const px = Cat.x + dx * 30, py = Cat.y - 20 + dy * 30;
+  return G.customers.find((c) => c.state === 'reading' && Math.hypot(c.x - px, c.y - 30 - py) < 34) || null;
 }
 
 function bagFull() {
@@ -298,6 +310,23 @@ function interact() {
   if (!what) return;
 
   if (what.type === 'yarn') return Yarn.bat();
+  if (what.type === 'reader') {
+    const c = what.customer;
+    c.happyT = 0.6;
+    if (!c.petted) {
+      c.petted = true;
+      c.say = { text: 'Mrr, miło cię widzieć, {imie}!', t: 1.8 };
+      G.hearts++;
+      G.today.hearts++;
+      spawnHearts(c.x, c.y - 80, 2);
+      Sound.play('coin');
+      UI.updateHUD();
+    } else {
+      c.say = { text: 'Ćśś, czytam 📖', t: 1.4 };
+      Sound.play('click');
+    }
+    return;
+  }
   if (what.type === 'worldmap') {
     Sound.play('open');
     return UI.showMap(true);
@@ -370,6 +399,13 @@ function serve(c, i) {
   c.state = 'happy';
   c.t = 0;
   c.say = { text: pick(THANKS), t: 1.3 };
+  if (countVisit(c)) {
+    c.say = { text: 'Zostaję stałym klientem! ⭐', t: 1.8 };
+    addFloat(`⭐ ${c.name}: stały klient!`, c.x, c.y - 120, '#ffe08a', 2.2);
+    Sound.play('purchase');
+  }
+  // stały klient po zakupie czasem zostaje poczytać
+  c.toRead = branch().reading && isLoyal(c.name) && Math.random() < 0.6;
   spawnHearts(c.x, c.y - 70, 3);
   G.served++;
   UI.updateHUD();
@@ -388,6 +424,8 @@ function hintText() {
   if (Cat.activity) return Act.activeHint();
   const { tx, ty } = Cat.target();
   const what = whatIsAt(tx, ty);
+  if (what && what.type === 'reader')
+    return what.customer.petted ? `${what.customer.name} czyta w spokoju 📖` : `E: przywitaj się z gościem (${what.customer.name}) 💗`;
   if (what && what.type === 'yarn') return 'E: pacnij kłębek łapką (albo popchnij go, idąc)';
   if (what && Act.hint(what)) return Act.hint(what);
   const bag = Cat.bag;
@@ -492,6 +530,8 @@ function update(dt) {
   G.light += (targetLight - G.light) * Math.min(1, dt * 0.8);
   const nearDoor = G.customers.some((c) => Math.hypot(c.x - DOOR_POS.x, c.y - DOOR_POS.y) < 50);
   G.doorOpen += ((nearDoor ? 1 : 0) - G.doorOpen) * Math.min(1, dt * 8);
+  const nearGate = G.customers.some((c) => c.kind === 'reader' && Math.hypot(c.x - GATE.x, c.y - GATE.y) < 46);
+  G.gateOpen = (G.gateOpen || 0) + ((nearGate ? 1 : 0) - (G.gateOpen || 0)) * Math.min(1, dt * 8);
 
   for (const f of G.floaters) f.t += dt;
   G.floaters = G.floaters.filter((f) => f.t < f.life);
@@ -532,6 +572,8 @@ function render() {
   drawWindowsSky();
   drawSunbeams();
   drawDoor();
+  drawGate();
+  drawRoomEntrance();
   blit(ctx, ART.catBed, CAT_BED.x - 33, CAT_BED.y - 26);
   for (const col of activeSlotCols()) {
     ell(ctx, (col + 0.5) * T, SLOT_Y - 3, 18, 6);
@@ -552,7 +594,8 @@ function render() {
     list.push({ sortY: bottom, draw: () => blit(ctx, bc.art, bc.tx * T, bottom - BOOKCASE_H) });
   }
   list.push({ sortY: 5 * T, draw: drawCounter });
-  for (const c of G.customers) list.push({ sortY: c.y, draw: () => drawCustomer(ctx, c) });
+  for (const c of G.customers)
+    list.push({ sortY: c.state === 'reading' ? READ_SEATS[c.seat].bottom + 1 : c.y, draw: () => drawCustomer(ctx, c) });
   list.push({ sortY: Yarn.y, draw: () => Yarn.draw(ctx) });
   list.push({ sortY: Cat.activity ? Act.sortY() : Cat.y + 0.1, draw: () => Cat.draw(ctx) });
   if (Cat.activity && Cat.activity.type === 'read') list.push({ sortY: Cat.activity.prop.bottom + 0.5, draw: () => Act.drawOverlay(ctx) });
@@ -599,6 +642,78 @@ function drawDoor() {
   g_bell(ctx);
   ctx.restore();
 }
+// Furtka w barierce: otwiera się tylko przed stałymi klientami
+function drawGate() {
+  const top = 2 * T + 40, len = T + 2;
+  const x = GATE.x;
+  const a = (G.gateOpen || 0) * Math.PI * 0.45;
+  ctx.save();
+  ctx.translate(x, top);
+  ctx.rotate(-a);
+  rr(ctx, -5, 0, 10, len, 4);
+  fs(ctx, '#e8a46a', 2.5);
+  ell(ctx, 0, len / 2, 7.5, 7.5);
+  fs(ctx, '#fff4e2', 2);
+  drawStar(ctx, 0, len / 2, 5);
+  ctx.restore();
+  ell(ctx, x, top, 6, 6);
+  fs(ctx, '#f0b77f', 2);
+  ell(ctx, x, top + len, 6, 6);
+  fs(ctx, '#f0b77f', 2);
+}
+
+// Przejście do czytelni: przed zakupem zamknięte drzwi i puste miejsca na meble
+function drawRoomEntrance() {
+  const y0 = ROOM_DOOR_ROWS[0] * T, h = ROOM_DOOR_ROWS.length * T;
+  // tabliczka nad przejściem
+  const sy = y0 - 46;
+  ctx.beginPath();
+  ctx.moveTo(19 * T + 4, sy - 10);
+  ctx.lineTo(19 * T - 8, sy + 2);
+  ctx.moveTo(20 * T - 4, sy - 10);
+  ctx.lineTo(20 * T + 8, sy + 2);
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = OL;
+  ctx.stroke();
+  rr(ctx, 19 * T - 22, sy, T + 44, 24, 8);
+  fs(ctx, '#fff4e2', 2.5);
+  ctx.font = '700 11px Fredoka, "Pixelify Sans", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = OL;
+  ctx.fillText('Czytelnia', 19.5 * T - 6, sy + 12.5);
+  drawStar(ctx, 19.5 * T + 31, sy + 12, 5.5);
+  if (branch().reading) return;
+  rr(ctx, 19 * T + 4, y0 - 2, T - 8, h + 2, 6);
+  fs(ctx, '#c97d4c', 3);
+  for (const yy of [y0 + 10, y0 + h / 2 + 4]) {
+    rr(ctx, 19 * T + 11, yy, T - 22, h / 2 - 18, 4);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(107,74,58,0.5)';
+    ctx.stroke();
+  }
+  ell(ctx, 19 * T + 12, y0 + h / 2, 3.5, 3.5);
+  fs(ctx, '#f4c542', 1.5);
+  // tabliczka
+  rr(ctx, 19 * T - 6, y0 + h / 2 - 12, T + 12, 22, 6);
+  fs(ctx, '#fff4e2', 2);
+  ctx.font = '700 10px Fredoka, "Pixelify Sans", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = OL;
+  ctx.fillText('wkrótce ⭐', 19.5 * T, y0 + h / 2 - 0.5);
+  ctx.setLineDash([6, 6]);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(185,120,74,0.45)';
+  for (const s of READ_SEATS) {
+    rr(ctx, s.x + 4, s.bottom - 58, 52, 52, 10);
+    ctx.stroke();
+  }
+  rr(ctx, 21 * T + 4, 2 * T + 4, 3 * T - 8, T - 8, 8);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
 function g_bell(g) {
   g.beginPath();
   g.arc(0, 8, 6, Math.PI, 0);
@@ -639,6 +754,7 @@ function drawSunbeams() {
   ctx.save();
   ctx.beginPath();
   ctx.rect(T, 2 * T, 18 * T, 10 * T);
+  ctx.rect(ROOM_X0 * T, 2 * T, (ROOM_X1 - ROOM_X0) * T, 10 * T);
   ctx.clip();
   ctx.fillStyle = `rgba(255,240,190,${a})`;
   for (const w of WINDOWS) {
@@ -659,6 +775,15 @@ function drawTargetHighlight() {
   const what = whatIsAt(tx, ty);
   if (!what) return;
   let x, y, w, h;
+  if (what.type === 'reader') {
+    const c = what.customer;
+    const a = 0.55 + Math.sin(G.time * 6) * 0.3;
+    ell(ctx, c.x, c.y - 34, 30, 40);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = `rgba(255,250,215,${a})`;
+    ctx.stroke();
+    return;
+  }
   if (what.type === 'yarn') {
     const a = 0.55 + Math.sin(G.time * 6) * 0.3;
     ell(ctx, Yarn.x, Yarn.y - YARN_R, YARN_R + 6, YARN_R + 6);
@@ -731,11 +856,11 @@ function drawLighting() {
   // girlanda lampek
   const colors = ['#ffd36b', '#ff9e8a', '#9fe0c0', '#a8c8ff'];
   ctx.beginPath();
-  for (let x = 2.2 * T; x < 18.6 * T; x += 4) ctx.lineTo(x, 13 + Math.sin(x * 0.045) * 4 + 4 + Act.wobble(x) * 0.6);
+  for (let x = 2.2 * T; x < 25.6 * T; x += 4) ctx.lineTo(x, 13 + Math.sin(x * 0.045) * 4 + 4 + Act.wobble(x) * 0.6);
   ctx.lineWidth = 1.5;
   ctx.strokeStyle = 'rgba(107,74,58,0.6)';
   ctx.stroke();
-  for (let i = 0, x = 2.4 * T; x < 18.5 * T; x += 26, i++) {
+  for (let i = 0, x = 2.4 * T; x < 25.5 * T; x += 26, i++) {
     const y = 13 + Math.sin(x * 0.045) * 4 + 9 + Act.wobble(x);
     const on = (glow > 0 && Math.sin(G.time * 2 + i) > -0.6) || Math.abs(Act.wobble(x)) > 1.5;
     if (on) {
@@ -750,10 +875,10 @@ function drawLighting() {
 
 // Papierowe lampiony (Japonia)
 function drawLanterns(glow) {
-  const xs = [2.6, 5.5, 8.6, 14.1, 18.3];
+  const xs = [2.6, 5.5, 8.6, 14.1, 18.3, 22.4, 25.2];
   ctx.beginPath();
   ctx.moveTo(1.5 * T, 9);
-  ctx.lineTo(18.8 * T, 9);
+  ctx.lineTo(25.8 * T, 9);
   ctx.lineWidth = 1.5;
   ctx.strokeStyle = 'rgba(107,74,58,0.6)';
   ctx.stroke();

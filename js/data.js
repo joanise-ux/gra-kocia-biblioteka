@@ -42,6 +42,7 @@ const UPGRADES = {
   speed: { name: 'Szybkie łapki', icon: '🐾', prices: [60, 140, 260], desc: '{kot} chodzi szybciej.' },
   bag: { name: 'Torba na książki', icon: '👜', prices: [80, 200], desc: 'Kotka nosi więcej książek naraz i obsługuje kilku gości za jednym kursem.' },
   counter: { name: 'Większa lada', icon: '🛎️', prices: [180], desc: 'Jeszcze jedno miejsce dla gościa i więcej gości każdego dnia.' },
+  reading: { name: 'Czytelnia', icon: '⭐', prices: [300], desc: 'Pokój z fotelami za prawą ścianą. Wchodzą tu tylko stali klienci (⭐ po 3 wizytach): czytają w spokoju i zostawiają napiwek.' },
   cozy: { name: 'Przytulny kącik', icon: '🛋️', prices: [100, 220], desc: 'Zadowoleni goście zostawiają większe napiwki.' },
 };
 
@@ -146,12 +147,14 @@ const THEMES = {
     floorA: '#fbe8cb', floorB: '#f7dfbd', custA: '#f6d9b8', custB: '#f0cda8', grout: 'rgba(214,170,120,0.35)',
     wall: '#f6cdab', wallStripe: '#f9d8bb', wood: '#b9784a', wainscot: '#d9915a', panel: '#e6a46c',
     rug: ['#e98b7a', '#fbe2c2', '#f2b46a'], round: ['#9cc48a', '#b9d8a6'],
+    roomA: '#f3d9cc', roomB: '#eed0c1', roomRug: ['#8f7cc4', '#e9e1f6'],
     curtain: '#e98b7a', window: 'forest', painting: 'forest', lights: 'bulbs', plant: 'leafy', outside: '#a8d48e',
   },
   japan: {
     floorA: '#e3dca8', floorB: '#d3cb92', custA: '#d9b68c', custB: '#cfab80', grout: 'rgba(140,100,60,0.3)',
     wall: '#f8f1df', wallStripe: '#f8f1df', wood: '#8a5a3a', wainscot: '#a8704a', panel: '#bd8558',
     rug: ['#3f5f8f', '#eef2f7', '#d9534f'], round: ['#d9534f', '#f6d6c6'],
+    roomA: '#e3dca8', roomB: '#d3cb92', roomRug: ['#4f6b45', '#eef2e4'],
     curtain: '#d9534f', window: 'sakura', painting: 'fuji', lights: 'lanterns', plant: 'bamboo', outside: '#f6c6d4',
     tatami: true, shoji: true,
   },

@@ -26,7 +26,7 @@ const Act = {
     if (p) return { type: p.act, prop: p };
     if (tx === 19 && WALL_MAP.rows.includes(ty)) return { type: 'worldmap' };
     // ściana z lampkami za szafami (kotka stoi tuż pod nią)
-    if (ty === 1 && tx >= 10 && tx <= 18) return { type: 'lights', tx };
+    if (ty === 1 && ((tx >= 10 && tx <= 18) || (tx >= ROOM_X0 && tx < ROOM_X1))) return { type: 'lights', tx };
     return null;
   },
 

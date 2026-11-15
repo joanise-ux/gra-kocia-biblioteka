@@ -3,13 +3,29 @@
    Sala biblioteki: układ, kolizje, szafy, meble, tło.
    ========================================================= */
 
-const MAP_W = 20;
+const MAP_W = 27; // sala (kolumny 1–18) + ścianka (19) + czytelnia (20–25)
 const MAP_H = 13;
 const WORLD_W = MAP_W * T;
 const WORLD_H = MAP_H * T;
 
+/* ---------- czytelnia dla stałych klientów ---------- */
+const ROOM_X0 = 20; // pierwsza kolumna czytelni
+const ROOM_X1 = 26; // ściana zewnętrzna
+const ROOM_DOOR_ROWS = [6, 7];
+const GATE = { x: 9 * T + 23, y: 3.35 * T }; // furtka w barierce
+// Fotele w czytelni (kafel fotela)
+const READ_SEATS = [
+  { tx: 21, ty: 5 },
+  { tx: 24, ty: 5 },
+  { tx: 21, ty: 9 },
+  { tx: 24, ty: 9 },
+].map((s) => {
+  const x = s.tx * T - 6, bottom = (s.ty + 1) * T + 4;
+  return { ...s, x, bottom, sx: x + 30, sy: bottom - 16 };
+});
+
 // W = ściana, C = lada, R = barierka, . = podłoga
-const MAP_ROWS = [
+const HALL_ROWS = [
   'WWWWWWWWWWWWWWWWWWWW',
   'WWWWWWWWWWWWWWWWWWWW',
   'W........R.........W',
@@ -24,6 +40,11 @@ const MAP_ROWS = [
   'W..................W',
   'WWWWWWWWWWWWWWWWWWWW',
 ];
+// Dokładamy czytelnię za prawą ścianą sali; przejście w rzędach 6–7
+const MAP_ROWS = HALL_ROWS.map((r, y) => {
+  if (y < 2 || y > 11) return r + 'WWWWWWW';
+  return r.slice(0, 19) + (ROOM_DOOR_ROWS.includes(y) ? '.' : 'W') + '......W';
+});
 
 const COUNTER_ROW = 4;
 const ALL_SLOT_COLS = [3, 4, 5, 6];
@@ -40,6 +61,7 @@ const WALL_MAP = { x: 19 * T + 4, y: 3 * T + 12, w: 36, h: 62, rows: [3, 4] };
 const WINDOWS = [
   { x: 3 * T + 4, y: 14, w: 2 * T - 8, h: 58 },
   { x: 6 * T + 4, y: 14, w: 2 * T - 8, h: 58 },
+  { x: 20 * T + 12, y: 14, w: 2 * T - 8, h: 58 }, // czytelnia
 ];
 
 const SOLID = [];
@@ -49,6 +71,8 @@ const LAMPS = [
   { x: 18 * T + 18, y: 9 * T - 44, jy: 9 * T, r: 110 },
   { x: 6 * T + 22 + T, y: 4 * T - 40, r: 90 },
   { x: 4.75 * T, y: 9 * T - 10, r: 70 },
+  { x: 23 * T, y: 7.4 * T, r: 150 }, // czytelnia
+  { x: 20 * T + 24, y: 3 * T - 44, jy: 3 * T, r: 90 },
 ];
 let ART = {};
 
@@ -152,6 +176,11 @@ function buildArt() {
     lamp: jp ? makeAndonArt() : makeFloorLampArt(),
     sideTable: jp ? makeTeaTrayArt() : makeSideTableArt(),
     readingTable: jp ? makeChabudaiArt() : makeReadingTableArt(),
+    plantD: theme().plant === 'bamboo' ? makeBambooArt(31, true) : makePlantArt(31, true),
+    roomCase: makeBookcaseArt(
+      ['fantasy', 'poetry', 'history', 'nature', 'romance'].map((cat) => ({ cat, count: BOOKS_PER_SHELF })),
+      977
+    ),
   };
   for (const bc of BOOKCASES) bc.key = null;
 }
@@ -176,6 +205,24 @@ function buildWorld() {
   solid([[10, 2], [18, 2], [1, 11], [18, 9], [17, 10], [18, 10], [3, 9], [4, 9]]);
 
   const b = branch();
+  if (b.reading) {
+    // umeblowana czytelnia
+    STATIC_PROPS.push(
+      { art: 'lamp', x: 20 * T + 6, bottom: 3 * T - 4 },
+      { art: 'roomCase', x: 21 * T, bottom: 3 * T },
+      { art: 'plantD', x: 25 * T + 2, bottom: 3 * T - 2, act: 'plant', tiles: [[25, 2]] }
+    );
+    solid([[20, 2], [21, 2], [22, 2], [23, 2], [25, 2]]);
+    for (const s of READ_SEATS) {
+      STATIC_PROPS.push({ art: 'armchair', x: s.x, bottom: s.bottom });
+      solid([[s.tx, s.ty]]);
+    }
+    for (const ty of [5, 9]) {
+      STATIC_PROPS.push({ art: 'sideTable', x: 22.5 * T + 4, bottom: (ty + 1) * T + 2 });
+      solid([[22, ty], [23, ty]]);
+    }
+  } else solid(ROOM_DOOR_ROWS.map((y) => [19, y])); // drzwi zamknięte
+
   BOOKCASES = [];
   for (let i = 0; i < b.bookcases; i++) {
     const s = BOOKCASE_SPOTS[i];
@@ -192,9 +239,13 @@ function drawBackground() {
     const TH = theme();
     // podłoga
     for (let ty = 2; ty < 12; ty++)
-      for (let tx = 1; tx < 19; tx++) {
+      for (let tx = 1; tx < ROOM_X1; tx++) {
+        if (tx === 19 && !ROOM_DOOR_ROWS.includes(ty)) continue;
         const cust = ty < 4 && tx < 9;
-        g.fillStyle = (tx + ty) % 2 ? (cust ? TH.custA : TH.floorA) : cust ? TH.custB : TH.floorB;
+        const room = tx >= 19;
+        g.fillStyle = (tx + ty) % 2
+          ? room ? TH.roomA : cust ? TH.custA : TH.floorA
+          : room ? TH.roomB : cust ? TH.custB : TH.floorB;
         g.fillRect(tx * T, ty * T, T, T);
         g.fillStyle = TH.grout;
         g.fillRect(tx * T, ty * T, T, 1.5);
@@ -224,6 +275,15 @@ function drawBackground() {
     fs(g, TH.round[1], 2);
     ell(g, 16.4 * T, 10.6 * T, 1.05 * T, 0.48 * T);
     fs(g, TH.round[0], 2);
+    // dywan w czytelni
+    rr(g, 20.4 * T, 6.3 * T, 5.2 * T, 2.6 * T, 30);
+    fs(g, TH.roomRug[0], 3);
+    rr(g, 20.4 * T + 12, 6.3 * T + 12, 5.2 * T - 24, 2.6 * T - 24, 20);
+    fs(g, TH.roomRug[1], 2);
+    for (let i = 0; i < 4; i++) {
+      ell(g, 21.4 * T + i * 1.05 * T, 7.6 * T, 7, 7);
+      fs(g, TH.roomRug[0], 1.5);
+    }
 
     // ściana tylna
     g.fillStyle = TH.wall;
@@ -253,6 +313,7 @@ function drawBackground() {
     }
     g.fillStyle = 'rgba(107,74,58,0.18)';
     g.fillRect(T, 2 * T, 18 * T, 6);
+    g.fillRect(ROOM_X0 * T, 2 * T, 6 * T, 6);
 
     // okna z widokiem na las
     for (const w of WINDOWS) drawWindow(g, w, R);
@@ -302,25 +363,45 @@ function drawBackground() {
     }
 
     // ściany boczne i dolna
+    const dTop = ROOM_DOOR_ROWS[0] * T, dBot = (ROOM_DOOR_ROWS[ROOM_DOOR_ROWS.length - 1] + 1) * T;
     g.fillStyle = TH.wood;
     g.fillRect(0, 0, T - 8, WORLD_H);
-    g.fillRect(19 * T + 8, 0, T - 8, WORLD_H);
+    g.fillRect(ROOM_X1 * T + 8, 0, T - 8, WORLD_H);
     g.fillRect(0, 12 * T + 8, WORLD_W, T - 8);
+    // ścianka między salą a czytelnią, z przejściem
+    g.fillRect(19 * T + 8, 2 * T - 32, T - 16, dTop - 2 * T + 32);
+    g.fillRect(19 * T + 8, dBot, T - 16, 12 * T + 8 - dBot);
     g.fillStyle = TH.wainscot;
     g.fillRect(T - 8, 2 * T, 8, 10 * T + 8);
-    g.fillRect(19 * T, 2 * T, 8, 10 * T + 8);
-    g.fillRect(T - 8, 12 * T, 18 * T + 16, 8);
+    for (const x of [19 * T, 20 * T - 8]) {
+      g.fillRect(x, 2 * T, 8, dTop - 2 * T);
+      g.fillRect(x, dBot, 8, 12 * T + 8 - dBot);
+    }
+    g.fillRect(ROOM_X1 * T, 2 * T, 8, 10 * T + 8);
+    g.fillRect(T - 8, 12 * T, (ROOM_X1 - 1) * T + 16, 8);
+    // futryna przejścia
+    for (const y of [dTop - 10, dBot - 2]) {
+      rr(g, 19 * T - 2, y, T + 4, 12, 4);
+      fs(g, TH.panel, 2.5);
+    }
     g.fillStyle = 'rgba(107,74,58,0.25)';
     g.fillRect(T, 2 * T, 4, 10 * T);
-    g.fillRect(19 * T - 4, 2 * T, 4, 10 * T);
+    g.fillRect(19 * T - 4, 2 * T, 4, dTop - 2 * T);
+    g.fillRect(19 * T - 4, dBot, 4, 12 * T - dBot);
+    g.fillRect(ROOM_X0 * T, 2 * T, 4, dTop - 2 * T);
+    g.fillRect(ROOM_X0 * T, dBot, 4, 12 * T - dBot);
+    g.fillRect(ROOM_X1 * T - 4, 2 * T, 4, 10 * T);
     drawWallMap(g);
 
     // barierka (kolumna 9)
+    // (z furtką dla stałych klientów, rysowaną na bieżąco w game.js)
     const rx = 9 * T + 16;
-    rr(g, rx, 2 * T - 10, 14, 3 * T + 6, 6);
+    rr(g, rx, 2 * T - 10, 14, T + 50, 6);
     fs(g, '#d9915a', 3);
-    for (let y = 2 * T; y < 5 * T; y += T) {
-      ell(g, rx + 7, y + 8, 10, 10);
+    rr(g, rx, 3 * T + 40, 14, T + 6, 6);
+    fs(g, '#d9915a', 3);
+    for (const y of [2 * T + 8, 4 * T + 8]) {
+      ell(g, rx + 7, y, 10, 10);
       fs(g, '#f0b77f', 2.5);
     }
 
@@ -474,10 +555,12 @@ function drawTatami(g) {
   g.beginPath();
   g.rect(T, 2 * T, 18 * T, 10 * T);
   g.rect(T, 2 * T, 8 * T, 2 * T); // bez strefy klientów
+  g.rect(19 * T, ROOM_DOOR_ROWS[0] * T, T, ROOM_DOOR_ROWS.length * T);
+  g.rect(ROOM_X0 * T, 2 * T, (ROOM_X1 - ROOM_X0) * T, 10 * T);
   g.clip('evenodd');
   for (let ty = 2; ty < 12; ty++) {
     const off = ty % 2 ? T : 0;
-    for (let x = T - off; x < 19 * T; x += 2 * T) {
+    for (let x = T - off; x < ROOM_X1 * T; x += 2 * T) {
       g.fillStyle = '#e3dca8';
       g.fillRect(x, ty * T, 2 * T, T);
       g.fillStyle = 'rgba(160,150,90,0.25)';

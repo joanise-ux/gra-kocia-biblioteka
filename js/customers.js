@@ -9,7 +9,99 @@ const WRONG = ['Hmm… to nie ta.', 'Oj, inny gatunek…', 'Szukam czegoś inneg
 const RETURN_LINES = ['Oddaję, była piękna!', 'Przeczytana!', 'Dziękuję za lekturę, {imie}!'];
 const SOLD_OUT = ['Wszystkie wyszły? Wrócę jutro!', 'Nic nie szkodzi, wpadnę jutro!'];
 
+const READER_LINES = ['Cudowna cisza…', 'Jeszcze jeden rozdział!', 'Ach, jak tu miło.', 'Mrr… znaczy, hmm.'];
+const READER_BYE = ['Dziękuję za czytelnię, {imie}!', 'Wrócę jutro poczytać!', 'Najlepsze miejsce w lesie!'];
+const LOYAL_AT = 3; // tylu obsłużonych wizyt trzeba, żeby zostać stałym klientem
+
 let _custId = 0;
+
+/* ---------------- STALI KLIENCI ---------------- */
+function visitsOf(name) {
+  const b = branch();
+  return (b.visits && b.visits[name]) || null;
+}
+function isLoyal(name) {
+  const v = visitsOf(name);
+  return !!v && v.n >= LOYAL_AT;
+}
+// Zapisuje wizytę; zwraca true, gdy klient właśnie został stałym klientem
+function countVisit(c) {
+  const b = branch();
+  b.visits = b.visits || {};
+  const v = (b.visits[c.name] = b.visits[c.name] || { n: 0, species: c.species, scarf: c.scarf });
+  v.n++;
+  return v.n === LOYAL_AT;
+}
+function loyalCount() {
+  const b = branch();
+  return Object.values(b.visits || {}).filter((v) => v.n >= LOYAL_AT).length;
+}
+
+/* ---------------- CZYTELNIA ---------------- */
+function freeSeat() {
+  const taken = G.customers.filter((c) => c.kind === 'reader').map((c) => c.seat);
+  const free = READ_SEATS.map((s, i) => i).filter((i) => !taken.includes(i));
+  return free.length ? pick(free) : -1;
+}
+// Od furtki do fotela
+function roomPath(seat) {
+  const s = READ_SEATS[seat];
+  const doorY = (ROOM_DOOR_ROWS[0] + 0.6) * T;
+  const p = [
+    { x: GATE.x, y: GATE.y },
+    { x: 10.5 * T, y: 3.6 * T },
+    { x: 10.5 * T, y: doorY },
+    { x: 19.5 * T, y: doorY },
+  ];
+  if (s.ty < ROOM_DOOR_ROWS[0]) p.push({ x: s.sx, y: doorY }, { x: s.sx, y: s.sy });
+  else p.push({ x: 20.3 * T, y: doorY }, { x: 20.3 * T, y: 10.9 * T }, { x: s.sx, y: 10.9 * T }, { x: s.sx, y: s.sy });
+  return p;
+}
+function sendToRoom(c, seat, from) {
+  c.kind = 'reader';
+  c.seat = seat;
+  c.col = -1;
+  c.state = 'toRoom';
+  c.speed = 125;
+  c.path = [...from, ...roomPath(seat)];
+  c.readFor = 18 + Math.random() * 12;
+  c.petted = false;
+  G.panelDirty = true;
+}
+function leaveRoom(c) {
+  const back = roomPath(c.seat).reverse().slice(1);
+  c.state = 'fromRoom';
+  c.leaving = true;
+  c.path = [...back, { x: 8.5 * T, y: GATE.y }, { x: DOOR_POS.x, y: AISLE_Y }, { x: DOOR_POS.x, y: DOOR_POS.y }];
+  G.panelDirty = true;
+}
+// Stały klient przychodzi tylko poczytać
+function spawnReader() {
+  const b = branch();
+  const seat = freeSeat();
+  if (seat < 0) return false;
+  const here = G.customers.map((c) => c.name);
+  const names = Object.keys(b.visits || {}).filter((n) => b.visits[n].n >= LOYAL_AT && !here.includes(n));
+  if (!names.length) return false;
+  const name = pick(names);
+  const v = b.visits[name];
+  const c = makeCustomer('reader', -1, { species: v.species, name, scarf: v.scarf });
+  sendToRoom(c, seat, [{ x: DOOR_POS.x, y: AISLE_Y }, { x: 8.5 * T, y: GATE.y }]);
+  G.customers.push(c);
+  Sound.play('bell');
+  return true;
+}
+function readerTip(c) {
+  const b = branch();
+  const n = 4 + b.cozy * 2;
+  G.today.tips += n;
+  addCoins(n, c.x, c.y - 100);
+  G.hearts++;
+  G.today.hearts++;
+  spawnHearts(c.x, c.y - 70, 2);
+  UI.updateHUD();
+  save();
+}
 
 function slotPath(col) {
   const x = (col + 0.5) * T;
@@ -103,7 +195,7 @@ function moveAlong(c, dt) {
   if (!target) return true;
   const dx = target.x - c.x, dy = target.y - c.y;
   const dist = Math.hypot(dx, dy);
-  const step = 95 * dt;
+  const step = (c.speed || 95) * dt;
   c.walkT += dt;
   if (dist <= step) {
     c.x = target.x;
@@ -125,6 +217,12 @@ function updateCustomers(dt) {
   }
   if (shoppersIn === 0 && G.spawnTimer > 2.5 && G.spawned < G.goal) G.spawnTimer = 2.5;
 
+  // stali klienci wpadają czasem tylko do czytelni
+  if (branch().reading) {
+    G.readerTimer -= dt;
+    if (G.readerTimer <= 0) G.readerTimer = spawnReader() ? 22 + Math.random() * 18 : 6;
+  }
+
   for (const loan of G.loans) loan.t -= dt;
   const due = G.loans.find((l) => l.t <= 0);
   if (due && spawnReturner(due)) G.loans.splice(G.loans.indexOf(due), 1);
@@ -132,6 +230,7 @@ function updateCustomers(dt) {
   for (const c of G.customers) {
     c.t += dt;
     if (c.shake > 0) c.shake -= dt;
+    if (c.happyT > 0) c.happyT -= dt;
     if (c.say) {
       c.say.t -= dt;
       if (c.say.t <= 0) c.say = null;
@@ -178,7 +277,34 @@ function updateCustomers(dt) {
         }
         break;
       case 'happy':
-        if (c.t > 1.3) startLeaving(c);
+        if (c.t > 1.3) {
+          const seat = c.toRead ? freeSeat() : -1;
+          if (seat >= 0) {
+            const x = (c.col + 0.5) * T;
+            sendToRoom(c, seat, [{ x, y: GATE.y }]);
+            c.say = { text: 'Idę do czytelni! ⭐', t: 1.6 };
+          } else startLeaving(c);
+        }
+        break;
+      case 'toRoom':
+        c.alpha = Math.min(1, c.alpha + dt * 3);
+        if (moveAlong(c, dt)) {
+          c.state = 'reading';
+          c.t = 0;
+          c.walkT = 0;
+          G.panelDirty = true;
+        }
+        break;
+      case 'reading':
+        if (!c.say && Math.random() < dt * 0.06) c.say = { text: pick(READER_LINES), t: 1.8 };
+        if (c.t > c.readFor) {
+          c.say = { text: pick(READER_BYE), t: 1.8 };
+          readerTip(c);
+          leaveRoom(c);
+        }
+        break;
+      case 'fromRoom':
+        if (moveAlong(c, dt)) c.state = 'exit';
         break;
       case 'leave':
         if (moveAlong(c, dt)) c.state = 'exit';
@@ -199,11 +325,12 @@ function customerAtSlot(col) {
 
 /* ---------------- RYSOWANIE ---------------- */
 function drawCustomer(ctx, c) {
-  const moving = c.state === 'enter' || c.state === 'leave';
+  const moving = ['enter', 'leave', 'toRoom', 'fromRoom'].includes(c.state);
   let bob = 0;
   if (moving) bob = -Math.abs(Math.sin(c.walkT * 9)) * 3;
   if (c.state === 'wait') bob = Math.sin(c.t * 2.5) * 0.8;
   if (c.state === 'happy') bob = -Math.abs(Math.sin(c.t * 10)) * 5;
+  if (c.state === 'reading') bob = Math.sin(c.t * 1.6) * 0.6 - (c.happyT > 0 ? Math.abs(Math.sin(c.happyT * 12)) * 4 : 0);
   const sx = c.shake > 0 ? Math.sin(c.t * 40) * 2.5 : 0;
   ctx.globalAlpha = Math.max(0, c.alpha);
   drawCritter(ctx, c.x + sx, c.y, c.species, c.scarf, {
@@ -213,10 +340,55 @@ function drawCustomer(ctx, c) {
     happy: c.state === 'happy',
     wave: c.state === 'wait' && c.t < 1.2,
   });
+  if (c.state === 'reading') drawReaderBook(ctx, c.x, c.y - 26 + bob, c.t);
+  if (isLoyal(c.name)) drawStar(ctx, c.x - 20, c.y - 62 + bob, 6.5);
   if (c.kind === 'returner' && (c.state === 'enter' || c.state === 'drop')) {
     drawBookIcon(ctx, c.x + 15, c.y - 20 + bob, CATEGORIES[c.book.cat].color, 1);
   }
   ctx.globalAlpha = 1;
+}
+
+// Otwarta książka trzymana przez czytelnika; co jakiś czas przewraca się kartka
+function drawReaderBook(g, x, y, t) {
+  const pw = 13;
+  g.beginPath();
+  g.moveTo(x, y);
+  g.quadraticCurveTo(x - 7, y - 4, x - pw, y - 2);
+  g.lineTo(x - pw, y + 7);
+  g.quadraticCurveTo(x - 7, y + 5, x, y + 9);
+  g.quadraticCurveTo(x + 7, y + 5, x + pw, y + 7);
+  g.lineTo(x + pw, y - 2);
+  g.quadraticCurveTo(x + 7, y - 4, x, y);
+  g.closePath();
+  fs(g, '#fff6e8', 2);
+  g.beginPath();
+  g.moveTo(x, y);
+  g.lineTo(x, y + 9);
+  g.lineWidth = 1.5;
+  g.stroke();
+  const k = (t % 4) / 0.5;
+  if (k < 1) {
+    const ex = x + pw * Math.cos(Math.PI * k);
+    const lift = Math.sin(Math.PI * k) * 6;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(ex, y - 2 - lift);
+    g.lineTo(ex, y + 6 - lift);
+    g.lineTo(x, y + 9);
+    g.closePath();
+    fs(g, '#fffdf6', 1.4);
+  }
+}
+
+function drawStar(g, x, y, r) {
+  g.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rr_ = i % 2 ? r * 0.45 : r;
+    g.lineTo(x + Math.cos(a) * rr_, y + Math.sin(a) * rr_);
+  }
+  g.closePath();
+  fs(g, '#ffd75e', 1.8);
 }
 
 function bubbleBox(ctx, x, y, w, h, tailX) {
