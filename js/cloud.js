@@ -4,12 +4,12 @@
  * The save lives in localStorage as before; when logged in it is also copied to
  * the `saves` table, so the same game continues on a phone and on a laptop.
  *
- * To turn it on, fill in the two values below (Supabase: Project Settings -> API).
+ * To turn it on, fill in the two values below (Supabase: Project Settings -> API Keys, the publishable key).
  * The anon key is public by design; the data is protected by RLS (supabase/schema.sql).
  * While they are empty, the game works exactly as before, without accounts.
  */
-const SUPABASE_URL = '';
-const SUPABASE_ANON_KEY = '';
+const SUPABASE_URL = 'https://nxwnksubnmgygegfcfuf.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_7iCN0b0wQm_y6rQjRBCsKA_W45Ag21U'; // publishable key
 
 const CLOUD_LINK_KEY = 'kocia-biblioteka-cloud-user'; // which account the local save is synced with
 const CLOUD_PUSH_DELAY_MS = 2000;
