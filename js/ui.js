@@ -169,6 +169,11 @@ const UI = {
     $('overlay-title').hidden = false;
     $('overlay-summary').hidden = true;
     $('confirm-new').hidden = true;
+    $('save-slot').hidden = !save;
+    if (save) {
+      $('slot-name').textContent = `🐱 ${save.catName || 'Kotka'}`;
+      $('slot-info').textContent = `☀️ dzień ${save.day || 1} · 🪙 ${save.coins || 0} · 💗 ${save.hearts || 0}`;
+    }
     if (save) {
       $('btn-continue').hidden = false;
       $('btn-continue').textContent = `Kontynuuj · dzień ${save.day}`;

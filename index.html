@@ -24,10 +24,10 @@
       <div id="hud">
         <span class="hud-item region" id="hud-region">🌲 Polski las</span>
         <span class="hud-item name" id="hud-name">🐱 Kotka</span>
-        <span class="hud-item">☀️ Dzień <b id="hud-day">1</b></span>
+        <span class="hud-item">☀️<span class="lbl"> Dzień</span> <b id="hud-day">1</b></span>
         <span class="hud-item coins">🪙 <b id="hud-coins">0</b></span>
         <span class="hud-item">💗 <b id="hud-hearts">0</b></span>
-        <span class="hud-item">🐾 Goście <b id="hud-progress">0/6</b></span>
+        <span class="hud-item">🐾<span class="lbl"> Goście</span> <b id="hud-progress">0/6</b></span>
         <span class="hud-right">
           <button id="btn-music" class="hud-btn icon" type="button" aria-label="Muzyka">🎵</button>
           <button id="btn-sfx" class="hud-btn icon" type="button" aria-label="Efekty dźwiękowe">🔊</button>
@@ -53,9 +53,14 @@
         </div>
 
         <div id="overlay-title" class="overlay">
+          <aside id="save-slot" class="save-slot" hidden>
+            <small>Zapisana gra</small>
+            <b id="slot-name"></b>
+            <span id="slot-info"></span>
+          </aside>
           <div class="card title-card">
             <canvas id="title-cat"></canvas>
-            <h1>Kocia Biblioteka</h1>
+            <h1><span class="t1">Kocia</span> <span class="t2">Biblioteka</span></h1>
             <p class="sub">Jesteś trzykolorową kotką, która prowadzi przytulną bibliotekę z księgarnią.
               Leśni goście przychodzą kupić albo wypożyczyć książkę. Przynieś im właściwą!</p>
             <label class="name-field" for="cat-name">Jak ma na imię Twoja kotka?

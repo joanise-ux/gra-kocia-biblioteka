@@ -16,8 +16,11 @@ const Touch = {
     if (this.active) return;
     this.active = true;
     document.body.classList.add('touch');
-    // the hint lies on the game, under its windows
-    document.getElementById('canvas-wrap').appendChild(document.getElementById('hint'));
+    // the HUD floats on the game (under its windows), the hint sits in the HUD's middle
+    const hud = document.getElementById('hud');
+    hud.insertBefore(document.getElementById('hint'), hud.querySelector('.hud-right'));
+    const wrap = document.getElementById('canvas-wrap');
+    wrap.insertBefore(hud, wrap.firstChild);
     this.syncFullscreenBtn();
     if (typeof resize === 'function' && canvas) resize();
   },

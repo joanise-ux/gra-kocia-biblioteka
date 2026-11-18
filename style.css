@@ -480,14 +480,14 @@ body.touch #app { display: block; padding: 0; }
 body.touch #canvas-wrap {
   position: fixed;
   z-index: 20; /* its overlays (title, shop, map) must cover the HUD bar */
-  inset: var(--hud-h, 44px) 0 0 0;
+  inset: 0;
   border: 0;
   border-radius: 0;
   box-shadow: none;
   max-width: none;
 }
 
-/* HUD: cienki pasek na górze planszy */
+/* HUD: cienki pasek na górze, w środku podpowiedź */
 body.touch #hud {
   position: fixed;
   z-index: 10;
@@ -496,26 +496,31 @@ body.touch #hud {
   right: 0;
   width: auto;
   max-width: none;
-  gap: 5px;
-  padding: max(5px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) 6px
-    max(8px, env(safe-area-inset-left, 0px));
-  background: var(--page);
-  border-bottom: 3px solid var(--line);
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  padding: max(6px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) 0
+    max(10px, env(safe-area-inset-left, 0px));
+  background: none;
+  pointer-events: none;
 }
+body.touch #hud > * { pointer-events: auto; }
+body.touch:not(.playing) #hud { visibility: hidden; }
 body.touch .hud-item,
 body.touch .hud-btn {
-  font-size: 14px;
-  padding: 3px 9px;
+  flex: none;
+  background: rgba(253, 245, 230, 0.86);
+  font-size: 13px;
+  line-height: 1.2;
+  padding: 2px 8px;
   border-width: 2px;
   box-shadow: 0 2px 0 var(--line);
-  background: rgba(253, 245, 230, 0.9);
 }
-body.touch .hud-item.coins { background: rgba(255, 242, 196, 0.92); }
 body.touch .hud-item.region,
 body.touch .hud-item.name,
-body.touch .hud-btn .lbl { display: none; }
-body.touch .hud-right { margin-left: auto; gap: 5px; }
-body.touch .hud-btn { min-width: 36px; min-height: 32px; }
+body.touch #hud .lbl { display: none; }
+body.touch .hud-right { margin-left: 0; gap: 4px; flex: none; }
+body.touch .hud-btn { min-width: 34px; min-height: 30px; padding: 2px 6px; }
 body.touch .touch-only { display: inline-block; }
 body.touch .touch-only[hidden] { display: none !important; }
 #btn-panel { position: relative; }
@@ -537,31 +542,37 @@ body.touch .touch-only[hidden] { display: none !important; }
   text-align: center;
 }
 
-/* podpowiedź: na dole, między joystickiem a łapką */
 body.touch #hint {
-  position: absolute;
-  z-index: 6;
-  left: 50%;
-  bottom: max(8px, env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: calc(100vw - 380px);
+  flex: 0 1 auto;
+  min-width: 0;
+  width: auto;
+  max-width: none;
   min-height: 0;
-  padding: 4px 12px;
-  font-size: 13px;
-  line-height: 1.25;
+  margin: 0 4px;
+  padding: 0 4px;
+  margin: 0 auto;
+  padding: 3px 12px;
+  font-size: 12px;
+  line-height: 1.2;
   text-align: center;
-  background: rgba(253, 245, 230, 0.92);
-  border-width: 2px;
+  color: var(--ink);
+  background: rgba(253, 245, 230, 0.86);
+  border: 2px solid rgba(107, 74, 58, 0.55);
+  border-radius: 12px;
+  box-shadow: none;
   pointer-events: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-body.touch #hint:empty { display: none; }
 @media (orientation: portrait) {
-  body.touch #hint { bottom: 160px; max-width: calc(100vw - 32px); }
+  body.touch #hud { flex-wrap: wrap; }
+  body.touch #hint { order: 10; flex-basis: 100%; }
 }
 
 /* sterowanie: joystick pojawia się pod palcem w lewej połowie ekranu */
-body.touch #touch-ui { position: fixed; inset: var(--hud-h, 44px) 0 0 0; z-index: 5; pointer-events: none; }
+body.touch #touch-ui { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
 body.touch #joy-zone {
   display: block;
   position: absolute;
@@ -575,14 +586,27 @@ body.touch #joy-zone {
 body.touch #joy {
   left: max(22px, calc(env(safe-area-inset-left, 0px) + 12px));
   bottom: max(18px, env(safe-area-inset-bottom, 0px));
-  width: 124px;
-  height: 124px;
-  opacity: 0.55;
+  width: 116px;
+  height: 116px;
+  opacity: 0.3;
   pointer-events: auto;
   transition: opacity 0.15s;
 }
-body.touch #joy.on { opacity: 0.9; bottom: auto; }
-body.touch #joy-knob { width: 54px; height: 54px; margin: -27px 0 0 -27px; }
+body.touch #joy {
+  background: radial-gradient(circle, rgba(253, 245, 230, 0.18) 0 55%, rgba(253, 245, 230, 0.35) 56% 100%);
+  border: 2px solid rgba(253, 245, 230, 0.9);
+  box-shadow: 0 0 0 2px rgba(107, 74, 58, 0.35);
+}
+body.touch #joy.on { opacity: 0.95; bottom: auto; }
+body.touch #joy-knob {
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  background: rgba(242, 166, 121, 0.92);
+  border: 2px solid rgba(107, 74, 58, 0.8);
+  box-shadow: 0 2px 0 rgba(107, 74, 58, 0.6);
+}
+body.touch #btn-act { border-width: 3px; box-shadow: 0 3px 0 var(--line), 0 0 0 4px rgba(253, 245, 230, 0.45); }
 body.touch #btn-act {
   right: max(24px, calc(env(safe-area-inset-right, 0px) + 14px));
   bottom: max(22px, calc(env(safe-area-inset-bottom, 0px) + 8px));
@@ -658,3 +682,92 @@ body.touch #panel .howto { display: none; }
 .rotate-icon { font-size: 54px; display: inline-block; animation: tilt 1.8s ease-in-out infinite; }
 @keyframes tilt { 0%, 30% { transform: rotate(0deg); } 60%, 100% { transform: rotate(-90deg); } }
 @media (prefers-reduced-motion: reduce) { .rotate-icon { animation: none; transform: rotate(-90deg); } }
+
+#ios-tip { background: #fff1d6; border: 2px dashed var(--line); border-radius: 12px; padding: 8px 10px; color: var(--ink); font-weight: 500; }
+@media (max-height: 360px) {
+  body.touch #btn-act { width: 76px; height: 76px; font-size: 34px; }
+  body.touch #joy { width: 104px; height: 104px; }
+  body.touch #joy-knob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+}
+
+
+/* ---------- ekran startowy na telefonie: menu gry na tle biblioteki ---------- */
+.save-slot { display: none; }
+body.touch #overlay-title {
+  justify-content: flex-start;
+  align-items: center;
+  backdrop-filter: none;
+  background: linear-gradient(90deg, rgba(253, 245, 230, 0.97) 0%, rgba(253, 245, 230, 0.92) 38%, rgba(253, 245, 230, 0) 72%);
+  padding-left: max(28px, env(safe-area-inset-left, 0px));
+}
+body.touch .title-card {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  margin: auto 0;
+  padding: 0;
+  max-width: min(440px, 52vw);
+  text-align: left;
+}
+body.touch .title-card > #title-cat { display: block; width: 76px; height: 70px; margin: 0 0 -4px -6px; }
+body.touch .title-card h1 {
+  font-size: 40px;
+  line-height: 0.95;
+  margin: 0 0 6px;
+  color: #b8572a;
+  text-shadow: 0 3px 0 rgba(107, 74, 58, 0.18);
+}
+body.touch .title-card h1 .t1 { display: block; font-size: 0.62em; letter-spacing: 3px; text-transform: uppercase; color: var(--line); }
+body.touch .title-card h1 .t2 { display: block; }
+body.touch .title-card .sub { font-size: 13px; margin: 0 0 10px; color: var(--muted); }
+body.touch .title-card .name-field { align-items: flex-start; font-size: 14px; margin: 0 0 10px; }
+body.touch .title-card .name-field input { width: 100%; font-size: 17px; text-align: left; padding: 5px 12px; }
+body.touch .title-card .buttons { flex-direction: column; align-items: stretch; gap: 8px; }
+body.touch .title-card .buttons button { text-align: left; padding: 8px 16px; font-size: 17px; }
+body.touch .title-card .buttons button::before { content: '▸ '; opacity: 0.6; }
+body.touch .title-card .confirm .buttons { flex-direction: row; }
+body.touch .title-card .confirm .buttons button::before { content: none; }
+body.touch .title-card .account { margin-top: 10px; text-align: left; }
+body.touch .title-card .keys { font-size: 12px; margin: 8px 0 0; }
+body.touch .title-card .keys:not(#ios-tip):not(.keys-touch) { display: none; }
+body.touch .save-slot:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right, 0px));
+  top: max(16px, env(safe-area-inset-top, 0px));
+  min-width: 190px;
+  padding: 8px 14px;
+  background: rgba(253, 245, 230, 0.92);
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 4px 0 var(--line);
+  line-height: 1.3;
+}
+.save-slot small { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; }
+.save-slot b { font-size: 17px; }
+.save-slot span { font-size: 13px; }
+@media (orientation: portrait) {
+  body.touch #overlay-title { background: rgba(253, 245, 230, 0.94); padding: 16px; }
+  body.touch .title-card { max-width: 100%; margin: auto; }
+  body.touch .save-slot:not([hidden]) { position: static; margin: 0 0 12px; }
+  body.touch #overlay-title { flex-direction: column; justify-content: center; }
+}
+
+body.touch:not(.playing) #touch-ui { display: none; }
+@media (orientation: landscape) and (max-height: 430px) {
+  body.touch .title-card .sub,
+  body.touch .title-card .keys-touch { display: none; }
+  body.touch .title-card > #title-cat { width: 56px; height: 52px; }
+  body.touch .title-card h1 { font-size: 32px; }
+  body.touch .title-card .name-field { margin-bottom: 8px; }
+  body.touch .title-card .name-field input { padding: 3px 12px; font-size: 16px; }
+  body.touch .title-card .buttons button { padding: 5px 14px; font-size: 16px; }
+  body.touch .title-card .account { margin-top: 6px; font-size: 12px; }
+  body.touch .title-card .account p { margin-bottom: 4px; }
+  body.touch .title-card #ios-tip { font-size: 11px; padding: 5px 8px; }
+}
+@media (orientation: landscape) and (max-height: 330px) {
+  body.touch .title-card > #title-cat { display: none; }
+  body.touch .title-card h1 { font-size: 28px; }
+}

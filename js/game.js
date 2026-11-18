@@ -526,22 +526,23 @@ function resize() {
 
 // Phone / tablet: the canvas fills the whole screen, the HUD and controls lie on top.
 function resizeMobile() {
-  const hud = document.getElementById('hud');
-  document.documentElement.style.setProperty('--hud-h', hud.offsetHeight + 'px');
+  // the HUD floats over the game; the camera may look a bit above the room so it covers no one
+  const hudH = document.getElementById('hud').offsetHeight + 4;
   const wrap = document.getElementById('canvas-wrap');
   const w = wrap.clientWidth || window.innerWidth;
   const h = wrap.clientHeight || window.innerHeight;
   const tablet = Math.min(w, h) >= 600;
   if (w >= h) {
-    // landscape: a fixed slice of the room's height, as wide as the screen allows
-    S = tablet ? h / 430 : Math.max(1, h / 300);
+    // phone: show the counter with the guests' bubbles and the cat below it at once
+    S = tablet ? (h - hudH) / 430 : Math.max(0.75, Math.min(1.15, (h - hudH) / 320));
   } else {
     S = w / (tablet ? 560 : 380);
   }
   // never show more than the whole room
-  S = Math.max(S, w / WORLD_W, h / WORLD_H);
+  S = Math.max(S, w / WORLD_W, (h - hudH) / WORLD_H);
   VIEW_W = w / S;
   VIEW_H = h / S;
+  Camera.topPad = hudH / S;
   applyCanvasSize(w, h);
 }
 
@@ -567,22 +568,23 @@ function updateCamera(dt) {
     tx = 4.6 * T - VIEW_W / 2;
     ty = 4.2 * T - VIEW_H / 2;
   } else if (Touch.active && Camera.tx == null) {
-    ty = Cat.y - 40 - VIEW_H * 0.65;
+    ty = Cat.y - 40 - VIEW_H * 0.72;
   } else if (Touch.active && Camera.tx != null) {
     // on a phone the view stays still while the cat walks around the middle,
     // and only follows when she gets close to an edge
-    const mx = VIEW_W * 0.2, my = VIEW_H * 0.16;
+    const mx = VIEW_W * 0.2, my = VIEW_H * 0.12;
     tx = Camera.tx;
     ty = Camera.ty;
     // the cat sits a bit low on screen, so guests at the counter above her stay in view
-    const cx = Cat.x - VIEW_W / 2, cy = Cat.y - 40 - VIEW_H * 0.65;
+    const cx = Cat.x - VIEW_W / 2, cy = Cat.y - 40 - VIEW_H * 0.72;
     if (cx < tx - mx) tx = cx + mx;
     else if (cx > tx + mx) tx = cx - mx;
     if (cy < ty - my) ty = cy + my;
     else if (cy > ty + my) ty = cy - my;
   }
   tx = Math.max(0, Math.min(WORLD_W - VIEW_W, tx));
-  ty = Math.max(0, Math.min(WORLD_H - VIEW_H, ty));
+  const top = Touch.active ? -(Camera.topPad || 0) : 0;
+  ty = Math.max(top, Math.min(WORLD_H - VIEW_H, ty));
   Camera.tx = tx;
   Camera.ty = ty;
   if (Camera.x == null) {
@@ -644,7 +646,7 @@ function update(dt) {
   const playing = G.state !== 'title';
   if (playing !== document.body.classList.contains('playing')) document.body.classList.toggle('playing', playing);
   let hint = hintText();
-  if (Touch.active) hint = hint.replace(/^E:/, '🐾:').replace('naciśnij E', 'dotknij 🐾').replace(/^Wybierz kategorię:.*/, 'Dotknij kategorii, żeby ją wziąć. ✕ zamyka.').replace('E albo Esc: zamknij', 'Dotknij 🐾, żeby zamknąć');
+  if (Touch.active) hint = hint.replace(/^E:/, '🐾:').replace('naciśnij E', 'dotknij 🐾').replace(/^Wybierz kategorię:.*/, 'Dotknij kategorii, żeby ją wziąć. ✕ zamyka.').replace('E albo Esc: zamknij', 'Dotknij 🐾, żeby zamknąć').replace('Podejdź do szafy lub lady, zwróć się w jej stronę i dotknij 🐾', 'Podejdź do szafy lub lady i dotknij 🐾');
   UI.setHint(hint);
 }
 
@@ -657,11 +659,30 @@ function frame(ts) {
 }
 
 /* ---------------- RYSOWANIE ---------------- */
+let _topWall = null, _topWallImg = null;
+function topWallColor() {
+  if (_topWall && _topWallImg === ART.bg.img) return _topWall;
+  _topWallImg = ART.bg.img;
+  _topWall = '#c98a63';
+  try {
+    const c = ART.bg.img;
+    const d = c.getContext('2d').getImageData(Math.floor(c.width / 2), 1, 1, 1).data;
+    _topWall = `rgb(${d[0]},${d[1]},${d[2]})`;
+  } catch (e) {
+    /* keep the default */
+  }
+  return _topWall;
+}
+
 function render() {
   const k = S * DPR;
   ctx.setTransform(k, 0, 0, k, -Math.round(Camera.x * k), -Math.round(Camera.y * k));
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
+  if (Camera.y < 0) {
+    ctx.fillStyle = topWallColor();
+    ctx.fillRect(Camera.x - 2, Camera.y - 2, VIEW_W + 4, -Camera.y + 4);
+  }
   blit(ctx, ART.bg, 0, 0);
 
   drawWindowsSky();
