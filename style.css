@@ -771,3 +771,24 @@ body.touch:not(.playing) #touch-ui { display: none; }
   body.touch .title-card > #title-cat { display: none; }
   body.touch .title-card h1 { font-size: 28px; }
 }
+
+/* ✕ w rogu okna: przyklejony u góry, widoczny także po przewinięciu */
+.card { position: relative; }
+.card-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  margin: -6px -12px -34px 8px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  background: var(--card2);
+  box-shadow: 0 3px 0 var(--line);
+}
+@media (pointer: coarse) { .card-close { width: 44px; height: 44px; } }
+.overlay:has(.card-close) { cursor: pointer; }
+.overlay:has(.card-close) .card { cursor: auto; }

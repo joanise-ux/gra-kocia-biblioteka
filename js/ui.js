@@ -126,6 +126,20 @@ const UI = {
     });
     $('picker-close').addEventListener('click', () => Picker.close());
 
+    // windows close with their ✕ or with a tap on the empty space around them
+    const closers = {
+      'overlay-map': () => this.showMap(false),
+      'overlay-loyal': () => this.showLoyal(false),
+      'overlay-account': () => AccountUI.close(),
+    };
+    for (const [id, close] of Object.entries(closers)) {
+      const ov = $(id);
+      ov.querySelector('.card-close').addEventListener('click', close);
+      ov.addEventListener('click', (e) => {
+        if (e.target === ov) close();
+      });
+    }
+
     // przełączniki dźwięku
     const syncAudioBtns = () => {
       $('btn-sfx').textContent = Sound.sfxOn ? '🔊' : '🔈';
