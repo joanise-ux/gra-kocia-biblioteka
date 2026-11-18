@@ -59,7 +59,7 @@ Uwaga: darmowy projekt Supabase zostaje uśpiony po tygodniu bez ruchu. Gra dzia
 
 ## Opinie i zgłoszenia błędów od testerów (Tally)
 
-Przycisk **💬** w górnym pasku (oraz link „Zgłoś opinię lub błąd” na ekranie startowym) otwiera nad grą formularz [Tally](https://tally.so) o ID `5X9QBQ` (`TALLY_FORM_ID` w `js/feedback.js`). Odpowiedzi czytasz w Tally: formularz → **Submissions**. Skrypt Tally ładuje się dopiero po kliknięciu przycisku. Jeśli się nie załaduje (np. bloker reklam), formularz otwiera się w nowej karcie.
+Przycisk **🐞** w górnym pasku (oraz link „Zgłoś błąd lub opinię” na ekranie startowym) otwiera nad grą formularz [Tally](https://tally.so) o ID `5X9QBQ` (`TALLY_FORM_ID` w `js/feedback.js`). Odpowiedzi czytasz w Tally: formularz → **Submissions**. Skrypt Tally ładuje się dopiero po kliknięciu przycisku. Jeśli się nie załaduje (np. bloker reklam), formularz otwiera się w nowej karcie.
 
 Gra przekazuje do formularza dane techniczne jako **ukryte pola** (hidden fields). Żeby je widzieć w odpowiedziach, dodaj w edytorze Tally blok *Hidden fields* (wpisz `/hidden`) z polami o dokładnie tych nazwach:
 
