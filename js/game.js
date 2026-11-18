@@ -458,15 +458,21 @@ function serve(c, i) {
 
 // Okienko (mapa świata albo karta stałych klientów) otwarte w trakcie dnia
 function overlayIsOpen() {
-  return !document.getElementById('overlay-map').hidden || !document.getElementById('overlay-loyal').hidden;
+  return (
+    !document.getElementById('overlay-map').hidden ||
+    !document.getElementById('overlay-loyal').hidden ||
+    Feedback.isOpen()
+  );
 }
 function closeOverlays() {
   UI.showMap(false);
   UI.showLoyal(false);
+  Feedback.close();
 }
 
 function hintText() {
   if (G.state !== 'play') return '';
+  if (Feedback.isOpen()) return '';
   if (overlayIsOpen()) return 'E albo Esc: zamknij';
   if (G.picker) return 'Wybierz kategorię: strzałki + E, cyfra albo kliknięcie. Esc zamyka.';
   if (Cat.activity) return Act.activeHint();
@@ -1075,6 +1081,7 @@ function init() {
   Shop.init();
   UI.init();
   AccountUI.init();
+  Feedback.init();
   window.addEventListener('resize', resize);
   UI.updateHUD();
   UI.showTitle(readSave());

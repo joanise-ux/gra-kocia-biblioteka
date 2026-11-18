@@ -33,6 +33,7 @@
           <button id="btn-sfx" class="hud-btn icon" type="button" aria-label="Efekty dźwiękowe">🔊</button>
           <button id="btn-loyal" class="hud-btn" type="button" aria-label="Stali klienci">⭐<span class="lbl"> Stali</span></button>
           <button id="btn-map" class="hud-btn" type="button" aria-label="Mapa świata">🗺️<span class="lbl"> Mapa</span></button>
+          <button id="btn-feedback" class="hud-btn icon" type="button" aria-label="Opinia lub błąd" title="Zgłoś opinię lub błąd" hidden>💬</button>
           <button id="btn-fs" class="hud-btn icon touch-only" type="button" aria-label="Pełny ekran" hidden>⛶</button>
           <button id="btn-panel" class="hud-btn icon touch-only" type="button" aria-label="Goście, torba i zapas" aria-expanded="false" aria-controls="panel">📋<span id="panel-badge" class="badge" hidden></span></button>
         </span>
@@ -85,6 +86,7 @@
             <p class="keys keys-touch">Dotknij i przesuń palec po lewej stronie ekranu: chodzenie · 🐾 po prawej: akcja · 📋 u góry: goście i zapas</p>
             <p id="ios-tip" class="keys" hidden>📲 Na iPhonie dodaj grę do ekranu początkowego (Udostępnij → „Do ekranu początkowego”). Otworzy się wtedy na całym ekranie, bez paska przeglądarki.</p>
             <p class="keys">🎵 Gra ma muzykę i dźwięki. Wyciszysz je przyciskami u góry.</p>
+            <p id="title-feedback" class="keys" hidden>Testujesz grę? <button id="btn-feedback-title" class="link" type="button">💬 Zgłoś opinię lub błąd</button></p>
           </div>
         </div>
 
@@ -171,6 +173,47 @@
           </div>
         </div>
 
+        <div id="overlay-feedback" class="overlay" hidden>
+          <div class="card feedback-card">
+            <button type="button" class="card-close" aria-label="Zamknij">✕</button>
+            <h1>💬 Opinia lub błąd</h1>
+
+            <form id="fb-form" novalidate>
+              <p class="sub">Dziękujemy, że testujesz Kocią Bibliotekę! Napisz, co Ci się podoba, co nie działa albo czego brakuje.</p>
+              <div class="fb-kinds" role="radiogroup" aria-label="Rodzaj zgłoszenia">
+                <label><input type="radio" name="fb-kind" value="opinia" checked><span>💬 Opinia</span></label>
+                <label><input type="radio" name="fb-kind" value="blad"><span>🐞 Błąd</span></label>
+                <label><input type="radio" name="fb-kind" value="pomysl"><span>💡 Pomysł</span></label>
+              </div>
+              <div class="fb-rating" role="radiogroup" aria-label="Jak Ci się gra? (nieobowiązkowe)">
+                <span class="fb-rating-lbl">Jak Ci się gra?</span>
+                <label title="Słabo"><input type="radio" name="fb-rating" value="1"><span>😞</span></label>
+                <label title="Tak sobie"><input type="radio" name="fb-rating" value="2"><span>🙁</span></label>
+                <label title="Może być"><input type="radio" name="fb-rating" value="3"><span>😐</span></label>
+                <label title="Fajnie"><input type="radio" name="fb-rating" value="4"><span>🙂</span></label>
+                <label title="Super"><input type="radio" name="fb-rating" value="5"><span>😍</span></label>
+              </div>
+              <label class="name-field" for="fb-message"><span id="fb-message-lbl">Twoja opinia</span>
+                <textarea id="fb-message" rows="5" maxlength="2000" placeholder=""></textarea>
+              </label>
+              <label class="name-field" for="fb-contact">E-mail, jeśli chcesz odpowiedzi (nieobowiązkowe)
+                <input id="fb-contact" type="email" maxlength="200" autocomplete="email" inputmode="email" spellcheck="false" placeholder="np. ola@poczta.pl">
+              </label>
+              <p class="note privacy">Razem z wiadomością wyślemy dane techniczne: dzień i filię w grze, rodzaj urządzenia i przeglądarki, rozmiar ekranu oraz ostatnie błędy gry. Bez imienia kotki i bez danych z konta. Adres e-mail podajesz tylko, jeśli chcesz, i użyjemy go wyłącznie do odpowiedzi.</p>
+              <p id="fb-error" class="note error" role="alert"></p>
+              <div class="buttons">
+                <button id="btn-fb-cancel" type="button" class="secondary">Anuluj</button>
+                <button id="btn-fb-send" type="submit">Wyślij</button>
+              </div>
+            </form>
+
+            <div id="fb-done" hidden>
+              <p class="sub">🐾 Dziękujemy! Zgłoszenie dotarło. Każda uwaga pomaga ulepszyć grę.</p>
+              <div class="buttons"><button id="btn-fb-close" type="button">Wróć do gry</button></div>
+            </div>
+          </div>
+        </div>
+
         <div id="overlay-map" class="overlay" hidden>
           <div class="card map-card">
             <button type="button" class="card-close" aria-label="Zamknij">✕</button>
@@ -235,6 +278,7 @@
   <script src="js/shop.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/cloud.js"></script>
+  <script src="js/feedback.js"></script>
   <script src="js/touch.js"></script>
   <script src="js/game.js"></script>
 </body>

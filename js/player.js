@@ -17,6 +17,9 @@ const Input = {
       ArrowRight: 'right', KeyD: 'right',
     };
     window.addEventListener('keydown', (e) => {
+      // typing in a form (e.g. the feedback window) must not move the cat or close windows
+      if (e.target instanceof Element && e.target.closest('input, textarea, select')) return;
+      if (Feedback.isOpen()) return;
       // mapa świata otwarta w trakcie dnia: kotka czeka, klawisze ją zamykają
       if (G.state === 'play' && overlayIsOpen()) {
         if (['Escape', 'KeyE', 'Space', 'Enter', 'KeyQ', 'KeyM', 'KeyK'].includes(e.code) && !e.repeat) {

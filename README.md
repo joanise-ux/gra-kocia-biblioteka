@@ -57,6 +57,16 @@ Listę kont graczy widzisz w panelu Supabase: **Authentication → Users**.
 
 Uwaga: darmowy projekt Supabase zostaje uśpiony po tygodniu bez ruchu. Gra działa wtedy lokalnie, a projekt wznowisz jednym kliknięciem w panelu.
 
+## Opinie i zgłoszenia błędów od testerów
+
+Przycisk **💬** w górnym pasku (oraz link „Zgłoś opinię lub błąd” na ekranie startowym) otwiera okienko, w którym gracz wybiera: 💬 opinia, 🐞 błąd albo 💡 pomysł, może ocenić grę buźką (1–5) i zostawić e-mail, jeśli chce odpowiedzi. Konto nie jest potrzebne.
+
+Zgłoszenia trafiają do tabeli `feedback` w tym samym projekcie Supabase co konta. Gracze mogą je tylko dodawać, nikt nie odczyta ich z gry. Czytasz je w panelu Supabase: **Table Editor → feedback** (kolumna `context` zawiera dane techniczne: dzień i filię w grze, urządzenie, przeglądarkę, rozmiar ekranu, czy gra jest zainstalowana na ekranie początkowym i ostatnie błędy JavaScript). Imienia kotki ani danych z konta nie wysyłamy.
+
+Konfiguracja: w **SQL Editor** uruchom ponownie cały `supabase/schema.sql` (jest bezpieczny do wielokrotnego uruchamiania). Dopóki tabeli nie ma, wysyłka kończy się komunikatem „Nie udało się wysłać”.
+
+Ochrona przed zalewem spamu: wiadomość ma 3–2000 znaków, jedno zgłoszenie na 20 s z jednego urządzenia i najwyżej 30 zgłoszeń na 10 minut łącznie. W Umami w zakładce **Events** widać też zdarzenie „opinia wysłana”.
+
 ## Wdrożenie na Vercel
 
 Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework: *Other*, bez komendy build → **Deploy**. Każdy push na `main` sam zaktualizuje grę.
@@ -73,7 +83,8 @@ Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework
 - `js/customers.js`: goście
 - `js/stats.js`: anonimowe statystyki odwiedzin (Umami)
 - `js/cloud.js`: konta graczy i zapis w chmurze (Supabase); `js/vendor/`: biblioteka supabase-js 2.118.0 (MIT)
-- `supabase/schema.sql`: tabela zapisów z RLS i funkcja usuwania konta
+- `js/feedback.js`: okienko „Opinia / błąd” dla testerów
+- `supabase/schema.sql`: tabela zapisów z RLS, funkcja usuwania konta i tabela zgłoszeń `feedback`
 - `js/shop.js`, `js/ui.js`: sklep i interfejs
 - `js/audio.js`: dźwięki i muzyka (Web Audio, bez plików)
 - `js/game.js`: pętla gry, kamera, zapis

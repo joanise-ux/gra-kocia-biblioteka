@@ -17,6 +17,7 @@ const CLOUD_START_TIMEOUT_MS = 6000;
 
 const Cloud = {
   client: null,
+  clientReady: null,
   user: null,
   ready: false, // first sync finished (or skipped), the title buttons may be used
   reachable: false, // the first connection to Supabase worked
@@ -75,11 +76,22 @@ const Cloud = {
     }
   },
 
+  // The Supabase library is loaded once, on first use (accounts or the feedback form).
+  getClient() {
+    if (!this.clientReady) {
+      this.clientReady = loadScript('js/vendor/supabase-2.118.0.js').then(() => {
+        this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+        });
+        return this.client;
+      });
+      this.clientReady.catch(() => (this.clientReady = null)); // offline: try again next time
+    }
+    return this.clientReady;
+  },
+
   async start() {
-    await loadScript('js/vendor/supabase-2.118.0.js');
-    this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
-    });
+    await this.getClient();
     const { data } = await this.client.auth.getSession();
     this.user = data.session ? data.session.user : null;
     if (this.user) await this.sync();
