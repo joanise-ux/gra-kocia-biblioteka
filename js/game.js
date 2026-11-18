@@ -501,11 +501,16 @@ function resize() {
   const narrow = window.innerWidth < 760;
   // na telefonie pokazujemy mniejszy fragment sali, więc postacie są większe
   const phoneLandscape = Touch.active && window.innerWidth > window.innerHeight && window.innerHeight < 520;
-  VIEW_W = phoneLandscape ? 540 : narrow ? 420 : 600;
-  VIEW_H = phoneLandscape ? 270 : narrow ? 300 : 375;
+  const phonePortrait = Touch.active && narrow && window.innerHeight > window.innerWidth;
+  document.body.classList.toggle('phone-land', phoneLandscape);
+  // pionowy telefon: wyższy widok, żeby plansza wypełniła ekran, a joystick zasłaniał mniej
+  VIEW_W = phoneLandscape ? 540 : phonePortrait ? 360 : narrow ? 420 : 600;
+  VIEW_H = phoneLandscape ? 270 : phonePortrait ? 400 : narrow ? 300 : 375;
   const availW = window.innerWidth - 32 - (wide ? 300 : 0);
   const hudH = document.getElementById('hud').offsetHeight || 40;
-  const availH = Touch.active ? window.innerHeight - hudH - 30 : window.innerHeight - (wide ? 130 : 170);
+  // w poziomie podpowiedź leży na planszy, w pionie pod nią
+  const hintH = phoneLandscape ? 0 : document.getElementById('hint').offsetHeight || 40;
+  const availH = Touch.active ? window.innerHeight - hudH - hintH - (phoneLandscape ? 22 : 44) : window.innerHeight - (wide ? 130 : 170);
   S = Math.max(0.5, Math.min(availW / VIEW_W, availH / VIEW_H, 2.4));
   DPR = window.devicePixelRatio || 1;
   canvas.style.width = Math.round(VIEW_W * S) + 'px';
@@ -587,7 +592,7 @@ function update(dt) {
     UI.updatePanel();
   }
   let hint = hintText();
-  if (Touch.active) hint = hint.replace(/^E:/, '🐾:').replace('naciśnij E', 'dotknij 🐾').replace(/^Wybierz kategorię:.*/, 'Dotknij kategorii, żeby ją wziąć. ✕ zamyka.');
+  if (Touch.active) hint = hint.replace(/^E:/, '🐾:').replace('naciśnij E', 'dotknij 🐾').replace(/^Wybierz kategorię:.*/, 'Dotknij kategorii, żeby ją wziąć. ✕ zamyka.').replace('E albo Esc: zamknij', 'Dotknij 🐾, żeby zamknąć');
   UI.setHint(hint);
 }
 

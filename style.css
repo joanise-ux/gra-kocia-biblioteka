@@ -256,7 +256,7 @@ button:disabled { opacity: 0.45; cursor: default; }
 /* podsumowanie + sklep */
 .summary-card { max-width: 900px; width: 100%; text-align: left; }
 .sum-cols { display: grid; grid-template-columns: 1fr 1.6fr; gap: 18px; margin-bottom: 12px; }
-@media (max-width: 760px) { .sum-cols { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .sum-cols { grid-template-columns: 1fr; } }
 .sum-left h1 { text-align: left; }
 .coins-pill { margin-left: auto; background: #fff2c4; border: 2px solid var(--line); border-radius: 999px; padding: 1px 10px; font-size: 15px; color: var(--ink); }
 .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
@@ -419,3 +419,46 @@ body.touch .keys-desktop { display: none; }
 #loyal-list .pips { font-size: 13px; margin-left: 4px; }
 #loyal-list li.empty { grid-column: 1 / -1; text-align: center; color: var(--muted); border: 2px dashed var(--line); border-radius: 14px; padding: 14px; }
 #loyal-list .stars { color: #e0a520; letter-spacing: 1px; font-size: 15px; }
+
+/* ---------- telefon: okna na cały ekran, dopracowanie dotyku ---------- */
+button, input { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* nakładki nie mieszczą się w małej planszy: na telefonie i tablecie pokazujemy je na całym ekranie */
+body.touch .overlay {
+  position: fixed;
+  z-index: 50;
+}
+@media (max-width: 759px), (max-height: 500px) {
+  .overlay {
+    position: fixed;
+    z-index: 50;
+    padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  #loyal-list { max-height: none; }
+}
+
+/* telefon w poziomie: jeden rząd HUD-u, podpowiedź na planszy między joystickiem a łapką */
+body.phone-land #stage { position: relative; }
+body.phone-land #hud { flex-wrap: nowrap; }
+body.phone-land .hud-item.name { display: none; }
+body.phone-land .hud-btn .lbl { display: none; }
+body.phone-land #hint {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: calc(var(--game-w) - 230px);
+  min-height: 0;
+  padding: 4px 10px;
+  font-size: 13px;
+  line-height: 1.25;
+  background: rgba(253, 245, 230, 0.92);
+  border-width: 2px;
+  pointer-events: none;
+  z-index: 2;
+}
+body.phone-land #hint:empty { display: none; }
+@media (max-width: 359px) { .hud-btn .lbl { display: none; } }
