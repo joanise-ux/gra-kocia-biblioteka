@@ -57,15 +57,24 @@ Listę kont graczy widzisz w panelu Supabase: **Authentication → Users**.
 
 Uwaga: darmowy projekt Supabase zostaje uśpiony po tygodniu bez ruchu. Gra działa wtedy lokalnie, a projekt wznowisz jednym kliknięciem w panelu.
 
-## Opinie i zgłoszenia błędów od testerów
+## Opinie i zgłoszenia błędów od testerów (Tally)
 
-Przycisk **💬** w górnym pasku (oraz link „Zgłoś opinię lub błąd” na ekranie startowym) otwiera okienko, w którym gracz wybiera: 💬 opinia, 🐞 błąd albo 💡 pomysł, może ocenić grę buźką (1–5) i zostawić e-mail, jeśli chce odpowiedzi. Konto nie jest potrzebne.
+Przycisk **💬** w górnym pasku (oraz link „Zgłoś opinię lub błąd” na ekranie startowym) otwiera nad grą formularz [Tally](https://tally.so) o ID `5X9QBQ` (`TALLY_FORM_ID` w `js/feedback.js`). Odpowiedzi czytasz w Tally: formularz → **Submissions**. Skrypt Tally ładuje się dopiero po kliknięciu przycisku. Jeśli się nie załaduje (np. bloker reklam), formularz otwiera się w nowej karcie.
 
-Zgłoszenia trafiają do tabeli `feedback` w tym samym projekcie Supabase co konta. Gracze mogą je tylko dodawać, nikt nie odczyta ich z gry. Czytasz je w panelu Supabase: **Table Editor → feedback** (kolumna `context` zawiera dane techniczne: dzień i filię w grze, urządzenie, przeglądarkę, rozmiar ekranu, czy gra jest zainstalowana na ekranie początkowym i ostatnie błędy JavaScript). Imienia kotki ani danych z konta nie wysyłamy.
+Gra przekazuje do formularza dane techniczne jako **ukryte pola** (hidden fields). Żeby je widzieć w odpowiedziach, dodaj w edytorze Tally blok *Hidden fields* (wpisz `/hidden`) z polami o dokładnie tych nazwach:
 
-Konfiguracja: w **SQL Editor** uruchom ponownie cały `supabase/schema.sql` (jest bezpieczny do wielokrotnego uruchamiania). Dopóki tabeli nie ma, wysyłka kończy się komunikatem „Nie udało się wysłać”.
+| Pole | Co zawiera |
+|---|---|
+| `dzien` | dzień w grze |
+| `filia` | filia (np. `forest`, `japan`) |
+| `stan` | ekran: `title` (start), `play` (gra), `summary` (koniec dnia) |
+| `urzadzenie` | dotyk/mysz i przeglądarka |
+| `ekran` | rozmiar okna i gęstość pikseli |
+| `zainstalowana` | czy gra jest dodana do ekranu początkowego |
+| `konto` | czy gracz jest zalogowany (bez adresu) |
+| `bledy` | ostatnie błędy JavaScript w grze |
 
-Ochrona przed zalewem spamu: wiadomość ma 3–2000 znaków, jedno zgłoszenie na 20 s z jednego urządzenia i najwyżej 30 zgłoszeń na 10 minut łącznie. W Umami w zakładce **Events** widać też zdarzenie „opinia wysłana”.
+Imienia kotki ani danych z konta nie wysyłamy. W Umami w zakładce **Events** widać też zdarzenie „opinia wysłana”.
 
 ## Wdrożenie na Vercel
 
@@ -83,8 +92,8 @@ Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework
 - `js/customers.js`: goście
 - `js/stats.js`: anonimowe statystyki odwiedzin (Umami)
 - `js/cloud.js`: konta graczy i zapis w chmurze (Supabase); `js/vendor/`: biblioteka supabase-js 2.118.0 (MIT)
-- `js/feedback.js`: okienko „Opinia / błąd” dla testerów
-- `supabase/schema.sql`: tabela zapisów z RLS, funkcja usuwania konta i tabela zgłoszeń `feedback`
+- `js/feedback.js`: przycisk „Opinia / błąd” (formularz Tally)
+- `supabase/schema.sql`: tabela zapisów z RLS i funkcja usuwania konta
 - `js/shop.js`, `js/ui.js`: sklep i interfejs
 - `js/audio.js`: dźwięki i muzyka (Web Audio, bez plików)
 - `js/game.js`: pętla gry, kamera, zapis
