@@ -19,6 +19,12 @@ const Cloud = {
   client: null,
   user: null,
   ready: false, // first sync finished (or skipped), the title buttons may be used
+  reachable: false, // the first connection to Supabase worked
+
+  // No internet (or Supabase unreachable): play locally, do not offer an account.
+  offline() {
+    return !this.client || !this.reachable || navigator.onLine === false;
+  },
   pushTimer: null,
   pushing: null,
 
@@ -34,9 +40,21 @@ const Cloud = {
     AccountUI.render();
     // Never block the game for long: offline or slow network = play locally.
     const giveUp = new Promise((resolve) => setTimeout(resolve, CLOUD_START_TIMEOUT_MS));
-    await Promise.race([this.start(), giveUp]).catch(() => {});
+    // a slow start may still finish after the timeout: then the account appears on its own
+    const started = this.start().then(() => {
+      this.reachable = true;
+      if (this.ready) AccountUI.render();
+    });
+    await Promise.race([started, giveUp]).catch(() => {});
     this.ready = true;
     AccountUI.render();
+    // Connection lost or back: update the title screen, and upload what waited meanwhile.
+    window.addEventListener('offline', () => AccountUI.render());
+    window.addEventListener('online', () => {
+      this.reachable = true;
+      AccountUI.render();
+      this.flush();
+    });
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') this.flush();
       else this.checkNewer().catch(() => {});
@@ -242,8 +260,10 @@ const AccountUI = {
     if (!Cloud.ready) {
       status.textContent = '☁️ Sprawdzam zapis na koncie…';
       btn.hidden = true;
-    } else if (!Cloud.client) {
-      status.textContent = '☁️ Brak połączenia. Grasz na tym urządzeniu, postęp zapisuje się lokalnie.';
+    } else if (Cloud.offline()) {
+      status.textContent = Cloud.user
+        ? '☁️ Brak internetu. Postęp zapisuje się na tym urządzeniu i trafi na konto, gdy wróci połączenie.'
+        : '☁️ Brak internetu. Grasz na tym urządzeniu, postęp zapisuje się lokalnie.';
       btn.hidden = true;
     } else if (Cloud.user) {
       status.textContent = `☁️ Zalogowano: ${Cloud.user.email}. Postęp zapisuje się na koncie.`;
