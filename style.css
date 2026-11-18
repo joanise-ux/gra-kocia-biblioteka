@@ -462,3 +462,16 @@ body.phone-land #hint {
 }
 body.phone-land #hint:empty { display: none; }
 @media (max-width: 359px) { .hud-btn .lbl { display: none; } }
+/* konto gracza */
+.account { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.account p { margin: 0 0 6px; }
+button.small { font-size: 15px; padding: 5px 14px; }
+.account-card { max-width: 460px; }
+.account-card form { margin: 0; }
+.account-card input[type="email"] { width: min(320px, 100%); }
+.account-card .privacy { margin-top: 12px; }
+.note.error { color: #b3261e; font-weight: 600; margin: 10px 0; }
+.choose { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.choose button { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.choose small { font-size: 14px; font-weight: 500; }
+body.touch button.small { min-height: 44px; }

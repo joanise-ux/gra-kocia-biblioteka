@@ -83,10 +83,21 @@ function save(over = {}) {
         loans: G.loans,
         cart: G.cart,
         ...over,
+        savedAt: Date.now(),
       })
     );
   } catch (e) {
     /* zapis niedostępny – gra działa dalej */
+  }
+  Cloud.schedulePush();
+}
+
+// Zapis pobrany z konta (cloud.js)
+function writeSave(data) {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (e) {
+    /* zapis niedostępny */
   }
 }
 
@@ -138,6 +149,7 @@ function startGame(continueSave) {
   G.cart = s?.cart || [];
   if (!s) restock();
   Sound.unlock();
+  Stats.event('start gry', { rodzaj: s ? 'kontynuacja' : 'nowa', dzien: G.day });
   beginDay();
 }
 
@@ -148,6 +160,7 @@ function endDay() {
   // zapisujemy już początek kolejnego dnia (z dostawą), żeby odświeżenie nie cofało gry
   save({ day: G.day + 1, served: 0, today: freshToday() });
   Sound.play('dayEnd');
+  Stats.event('koniec dnia', { dzien: G.day });
   UI.showSummary();
 }
 
@@ -1001,9 +1014,11 @@ function init() {
   Touch.init();
   Shop.init();
   UI.init();
+  AccountUI.init();
   window.addEventListener('resize', resize);
   UI.updateHUD();
   UI.showTitle(readSave());
+  Cloud.init();
   // po załadowaniu fontu przerysuj napisy w cache
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => {

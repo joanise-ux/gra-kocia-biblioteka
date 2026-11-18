@@ -65,6 +65,10 @@
                 <button id="btn-new-no" type="button" class="secondary">Nie</button>
               </div>
             </div>
+            <div id="account-box" class="account" hidden>
+              <p id="account-status"></p>
+              <button id="btn-account" class="secondary small" type="button" hidden>☁️ Zaloguj się</button>
+            </div>
             <p class="keys keys-desktop"><kbd>WASD</kbd>/<kbd>strzałki</kbd> chodzenie · <kbd>E</kbd>/<kbd>Spacja</kbd> akcja · <kbd>M</kbd> mapa · <kbd>K</kbd> stali klienci</p>
             <p class="keys keys-touch">Joystick po lewej: chodzenie · 🐾 po prawej: akcja</p>
             <p class="keys">🎵 Gra ma muzykę i dźwięki. Wyciszysz je przyciskami u góry.</p>
@@ -98,6 +102,57 @@
             <p id="loyal-sub" class="sub"></p>
             <ul id="loyal-list"></ul>
             <div class="buttons"><button id="btn-loyal-close" type="button">Zamknij</button></div>
+          </div>
+        </div>
+
+        <div id="overlay-account" class="overlay" hidden>
+          <div class="card account-card">
+            <h1>☁️ Konto gracza</h1>
+
+            <form id="acc-step-email" novalidate>
+              <p class="sub">Zaloguj się, żeby grać na telefonie i na komputerze tą samą kotką. Nie trzeba hasła: wyślemy Ci kod na e-mail.</p>
+              <label class="name-field" for="acc-email">Twój adres e-mail
+                <input id="acc-email" type="email" autocomplete="email" inputmode="email" spellcheck="false" placeholder="np. ola@poczta.pl">
+              </label>
+              <div class="buttons"><button type="submit">Wyślij kod</button></div>
+              <p class="note privacy">Adres e-mail służy tylko do logowania i zapisu postępu gry. Nie wysyłamy reklam ani newsletterów. Konto możesz w każdej chwili usunąć.</p>
+            </form>
+            <form id="acc-step-code" hidden novalidate>
+              <p class="sub">Wysłaliśmy kod na <b id="acc-code-to"></b>. Wpisz go poniżej. Nie widzisz maila? Zajrzyj do spamu.</p>
+              <label class="name-field" for="acc-code">Kod z maila
+                <input id="acc-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="12" placeholder="123456">
+              </label>
+              <div class="buttons">
+                <button id="btn-acc-back" type="button" class="secondary">Zmień adres</button>
+                <button type="submit">Zaloguj</button>
+              </div>
+            </form>
+
+            <div id="acc-step-done" hidden>
+              <p class="sub">Zalogowano jako <b id="acc-who"></b>. Postęp zapisuje się sam. Na drugim urządzeniu zaloguj się tym samym adresem.</p>
+              <div class="buttons">
+                <button id="btn-acc-logout" type="button" class="secondary">Wyloguj</button>
+                <button id="btn-acc-delete" type="button" class="secondary">Usuń konto</button>
+              </div>
+              <div id="acc-confirm-delete" class="confirm" hidden>
+                <p>Usunąć konto i zapis gry na koncie? Gra na tym urządzeniu zostanie.</p>
+                <div class="buttons">
+                  <button id="btn-acc-delete-yes" type="button" class="danger">Tak, usuń</button>
+                  <button id="btn-acc-delete-no" type="button" class="secondary">Nie</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="acc-step-choose" hidden>
+              <p class="sub">Na tym urządzeniu jest inna gra niż na koncie. Którą zachować? Druga zostanie zastąpiona.</p>
+              <div class="choose">
+                <button id="btn-acc-keep-cloud" type="button"><span>☁️ Gra z konta</span><small id="acc-cloud-desc"></small></button>
+                <button id="btn-acc-keep-local" type="button" class="secondary"><span>📱 Gra z tego urządzenia</span><small id="acc-local-desc"></small></button>
+              </div>
+            </div>
+
+            <p id="acc-error" class="note error" role="alert"></p>
+            <div class="buttons"><button id="btn-acc-close" type="button" class="secondary">Zamknij</button></div>
           </div>
         </div>
 
@@ -142,6 +197,7 @@
     </aside>
   </div>
 
+  <script src="js/stats.js"></script>
   <script src="js/data.js"></script>
   <script src="js/art.js"></script>
   <script src="js/audio.js"></script>
@@ -152,6 +208,7 @@
   <script src="js/customers.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/cloud.js"></script>
   <script src="js/touch.js"></script>
   <script src="js/game.js"></script>
 </body>
