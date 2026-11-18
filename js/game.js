@@ -138,6 +138,7 @@ function startGame(continueSave) {
   G.cart = s?.cart || [];
   if (!s) restock();
   Sound.unlock();
+  Stats.event('start gry', { rodzaj: s ? 'kontynuacja' : 'nowa', dzien: G.day });
   beginDay();
 }
 
@@ -148,6 +149,7 @@ function endDay() {
   // zapisujemy już początek kolejnego dnia (z dostawą), żeby odświeżenie nie cofało gry
   save({ day: G.day + 1, served: 0, today: freshToday() });
   Sound.play('dayEnd');
+  Stats.event('koniec dnia', { dzien: G.day });
   UI.showSummary();
 }
 

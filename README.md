@@ -24,6 +24,16 @@ python3 -m http.server 8000
 
 i otwórz http://localhost:8000.
 
+## Statystyki odwiedzin (Umami)
+
+Gra może wysyłać anonimowe statystyki do [Umami Cloud](https://cloud.umami.is) (darmowy plan, bez ciasteczek, bez danych osobowych). Panel pokazuje liczbę odwiedzających, czas wizyty, kraje i urządzenia.
+
+1. Załóż konto na cloud.umami.is → **Add website** → wpisz adres gry.
+2. Skopiuj **Website ID** i wklej go w `js/stats.js` w `UMAMI_WEBSITE_ID`.
+3. Wypchnij zmianę. Dopóki ID jest puste, nic nie jest wysyłane. Na `localhost` statystyki też są wyłączone.
+
+Otwarta i widoczna karta z grą co minutę wysyła zdarzenie „gra trwa”, dzięki czemu „Czas wizyty” w panelu pokazuje faktyczny czas grania. Dodatkowo w zakładce **Events** widać „start gry” (nowa / kontynuacja) oraz „koniec dnia” z numerem dnia, czyli jak daleko gracze dochodzą.
+
 ## Wdrożenie na Vercel
 
 Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework: *Other*, bez komendy build → **Deploy**. Każdy push na `main` sam zaktualizuje grę.
@@ -38,6 +48,7 @@ Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework
 - `js/activities.js`: zabawy kotki z otoczeniem (fotel, lampki, kwiatki, czytanie)
 - `js/yarn.js`: kłębek wełny do turlania
 - `js/customers.js`: goście
+- `js/stats.js`: anonimowe statystyki odwiedzin (Umami)
 - `js/shop.js`, `js/ui.js`: sklep i interfejs
 - `js/audio.js`: dźwięki i muzyka (Web Audio, bez plików)
 - `js/game.js`: pętla gry, kamera, zapis
