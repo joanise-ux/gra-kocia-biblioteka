@@ -419,3 +419,16 @@ body.touch .keys-desktop { display: none; }
 #loyal-list .pips { font-size: 13px; margin-left: 4px; }
 #loyal-list li.empty { grid-column: 1 / -1; text-align: center; color: var(--muted); border: 2px dashed var(--line); border-radius: 14px; padding: 14px; }
 #loyal-list .stars { color: #e0a520; letter-spacing: 1px; font-size: 15px; }
+
+/* konto gracza */
+.account { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.account p { margin: 0 0 6px; }
+button.small { font-size: 15px; padding: 5px 14px; }
+.account-card { max-width: 460px; }
+.account-card form { margin: 0; }
+.account-card input[type="email"] { width: min(320px, 100%); }
+.account-card .privacy { margin-top: 12px; }
+.note.error { color: #b3261e; font-weight: 600; margin: 10px 0; }
+.choose { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.choose button { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.choose small { font-size: 14px; font-weight: 500; }

@@ -83,10 +83,21 @@ function save(over = {}) {
         loans: G.loans,
         cart: G.cart,
         ...over,
+        savedAt: Date.now(),
       })
     );
   } catch (e) {
     /* zapis niedostępny – gra działa dalej */
+  }
+  Cloud.schedulePush();
+}
+
+// Zapis pobrany z konta (cloud.js)
+function writeSave(data) {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (e) {
+    /* zapis niedostępny */
   }
 }
 
@@ -998,9 +1009,11 @@ function init() {
   Touch.init();
   Shop.init();
   UI.init();
+  AccountUI.init();
   window.addEventListener('resize', resize);
   UI.updateHUD();
   UI.showTitle(readSave());
+  Cloud.init();
   // po załadowaniu fontu przerysuj napisy w cache
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => {
