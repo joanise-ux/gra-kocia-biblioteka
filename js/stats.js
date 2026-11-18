@@ -3,7 +3,7 @@
  * To turn it on, paste the "Website ID" from cloud.umami.is below.
  * While it is empty, nothing is sent anywhere.
  */
-const UMAMI_WEBSITE_ID = '';
+const UMAMI_WEBSITE_ID = 'e3b6c550-74e9-4d42-bbbc-3b1f52a9358f';
 
 const Stats = {
   // How often an open, visible game tab says "still here". Umami measures
