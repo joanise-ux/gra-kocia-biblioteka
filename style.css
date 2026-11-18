@@ -729,7 +729,7 @@ body.touch .title-card .confirm .buttons { flex-direction: row; }
 body.touch .title-card .confirm .buttons button::before { content: none; }
 body.touch .title-card .account { margin-top: 10px; text-align: left; }
 body.touch .title-card .keys { font-size: 12px; margin: 8px 0 0; }
-body.touch .title-card .keys:not(#ios-tip):not(.keys-touch) { display: none; }
+body.touch .title-card .keys:not(#ios-tip):not(.keys-touch):not(#title-feedback) { display: none; }
 body.touch .save-slot:not([hidden]) {
   display: flex;
   flex-direction: column;
@@ -792,3 +792,18 @@ body.touch:not(.playing) #touch-ui { display: none; }
 @media (pointer: coarse) { .card-close { width: 44px; height: 44px; } }
 .overlay:has(.card-close) { cursor: pointer; }
 .overlay:has(.card-close) .card { cursor: auto; }
+
+/* opinia / błąd (formularz Tally) */
+button.link {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: #2f6f8f;
+  text-decoration: underline;
+  cursor: pointer;
+}
+button.link:hover { background: none; color: #1f5470; }
+body.touch .title-card #title-feedback button.link { font-size: 13px; min-height: 32px; }

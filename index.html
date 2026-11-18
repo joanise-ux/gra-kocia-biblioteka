@@ -33,6 +33,7 @@
           <button id="btn-sfx" class="hud-btn icon" type="button" aria-label="Efekty dźwiękowe">🔊</button>
           <button id="btn-loyal" class="hud-btn" type="button" aria-label="Stali klienci">⭐<span class="lbl"> Stali</span></button>
           <button id="btn-map" class="hud-btn" type="button" aria-label="Mapa świata">🗺️<span class="lbl"> Mapa</span></button>
+          <button id="btn-feedback" class="hud-btn icon" type="button" aria-label="Zgłoś błąd lub opinię" title="Zgłoś błąd lub opinię" hidden>🐞</button>
           <button id="btn-fs" class="hud-btn icon touch-only" type="button" aria-label="Pełny ekran" hidden>⛶</button>
           <button id="btn-panel" class="hud-btn icon touch-only" type="button" aria-label="Goście, torba i zapas" aria-expanded="false" aria-controls="panel">📋<span id="panel-badge" class="badge" hidden></span></button>
         </span>
@@ -85,6 +86,7 @@
             <p class="keys keys-touch">Dotknij i przesuń palec po lewej stronie ekranu: chodzenie · 🐾 po prawej: akcja · 📋 u góry: goście i zapas</p>
             <p id="ios-tip" class="keys" hidden>📲 Na iPhonie dodaj grę do ekranu początkowego (Udostępnij → „Do ekranu początkowego”). Otworzy się wtedy na całym ekranie, bez paska przeglądarki.</p>
             <p class="keys">🎵 Gra ma muzykę i dźwięki. Wyciszysz je przyciskami u góry.</p>
+            <p id="title-feedback" class="keys" hidden>Testujesz grę? <button id="btn-feedback-title" class="link" type="button">🐞 Zgłoś błąd lub opinię</button></p>
           </div>
         </div>
 
@@ -235,6 +237,7 @@
   <script src="js/shop.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/cloud.js"></script>
+  <script src="js/feedback.js"></script>
   <script src="js/touch.js"></script>
   <script src="js/game.js"></script>
 </body>

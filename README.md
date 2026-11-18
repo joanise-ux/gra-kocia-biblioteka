@@ -57,6 +57,25 @@ Listę kont graczy widzisz w panelu Supabase: **Authentication → Users**.
 
 Uwaga: darmowy projekt Supabase zostaje uśpiony po tygodniu bez ruchu. Gra działa wtedy lokalnie, a projekt wznowisz jednym kliknięciem w panelu.
 
+## Opinie i zgłoszenia błędów od testerów (Tally)
+
+Przycisk **🐞** w górnym pasku (oraz link „Zgłoś błąd lub opinię” na ekranie startowym) otwiera nad grą formularz [Tally](https://tally.so) o ID `5X9QBQ` (`TALLY_FORM_ID` w `js/feedback.js`). Odpowiedzi czytasz w Tally: formularz → **Submissions**. Skrypt Tally ładuje się dopiero po kliknięciu przycisku. Jeśli się nie załaduje (np. bloker reklam), formularz otwiera się w nowej karcie.
+
+Gra przekazuje do formularza dane techniczne jako **ukryte pola** (hidden fields). Żeby je widzieć w odpowiedziach, dodaj w edytorze Tally blok *Hidden fields* (wpisz `/hidden`) z polami o dokładnie tych nazwach:
+
+| Pole | Co zawiera |
+|---|---|
+| `dzien` | dzień w grze |
+| `filia` | filia (np. `forest`, `japan`) |
+| `stan` | ekran: `title` (start), `play` (gra), `summary` (koniec dnia) |
+| `urzadzenie` | dotyk/mysz i przeglądarka |
+| `ekran` | rozmiar okna i gęstość pikseli |
+| `zainstalowana` | czy gra jest dodana do ekranu początkowego |
+| `konto` | czy gracz jest zalogowany (bez adresu) |
+| `bledy` | ostatnie błędy JavaScript w grze |
+
+Imienia kotki ani danych z konta nie wysyłamy. W Umami w zakładce **Events** widać też zdarzenie „opinia wysłana”.
+
 ## Wdrożenie na Vercel
 
 Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework: *Other*, bez komendy build → **Deploy**. Każdy push na `main` sam zaktualizuje grę.
@@ -73,6 +92,7 @@ Na vercel.com: **Add New → Project →** wybierz to repozytorium → Framework
 - `js/customers.js`: goście
 - `js/stats.js`: anonimowe statystyki odwiedzin (Umami)
 - `js/cloud.js`: konta graczy i zapis w chmurze (Supabase); `js/vendor/`: biblioteka supabase-js 2.118.0 (MIT)
+- `js/feedback.js`: przycisk „Opinia / błąd” (formularz Tally)
 - `supabase/schema.sql`: tabela zapisów z RLS i funkcja usuwania konta
 - `js/shop.js`, `js/ui.js`: sklep i interfejs
 - `js/audio.js`: dźwięki i muzyka (Web Audio, bez plików)
