@@ -35,7 +35,7 @@ const G = {
   panelDirty: true,
 };
 
-const Camera = { x: 0, y: 0 };
+const Camera = { x: 0, y: 0, tx: null, ty: null };
 
 function region() {
   return REGIONS.find((r) => r.id === G.region);
@@ -121,7 +121,7 @@ function beginDay() {
   Cat.reset();
   Act.reset();
   Yarn.reset();
-  Camera.x = Camera.y = null;
+  Camera.x = Camera.y = Camera.tx = Camera.ty = null;
   G.state = 'play';
   buildWorld();
   save();
@@ -195,7 +195,7 @@ function switchRegion(id) {
   delete b.cart;
   buildArt();
   buildWorld();
-  Camera.x = Camera.y = null;
+  Camera.x = Camera.y = Camera.tx = Camera.ty = null;
   UI.updateHUD();
   G.panelDirty = true;
   saveBetweenDays();
@@ -510,27 +510,48 @@ let S = 1.6, DPR = 1;
 let lastTs = 0;
 
 function resize() {
+  if (Touch.active) {
+    resizeMobile();
+    return;
+  }
   const wide = window.innerWidth >= 1150;
   const narrow = window.innerWidth < 760;
-  // na telefonie pokazujemy mniejszy fragment sali, więc postacie są większe
-  const phoneLandscape = Touch.active && window.innerWidth > window.innerHeight && window.innerHeight < 520;
-  const phonePortrait = Touch.active && narrow && window.innerHeight > window.innerWidth;
-  document.body.classList.toggle('phone-land', phoneLandscape);
-  // pionowy telefon: wyższy widok, żeby plansza wypełniła ekran, a joystick zasłaniał mniej
-  VIEW_W = phoneLandscape ? 540 : phonePortrait ? 360 : narrow ? 420 : 600;
-  VIEW_H = phoneLandscape ? 270 : phonePortrait ? 400 : narrow ? 300 : 375;
+  VIEW_W = narrow ? 420 : 600;
+  VIEW_H = narrow ? 300 : 375;
   const availW = window.innerWidth - 32 - (wide ? 300 : 0);
-  const hudH = document.getElementById('hud').offsetHeight || 40;
-  // w poziomie podpowiedź leży na planszy, w pionie pod nią
-  const hintH = phoneLandscape ? 0 : document.getElementById('hint').offsetHeight || 40;
-  const availH = Touch.active ? window.innerHeight - hudH - hintH - (phoneLandscape ? 22 : 44) : window.innerHeight - (wide ? 130 : 170);
+  const availH = window.innerHeight - (wide ? 130 : 170);
   S = Math.max(0.5, Math.min(availW / VIEW_W, availH / VIEW_H, 2.4));
+  applyCanvasSize(Math.round(VIEW_W * S), Math.round(VIEW_H * S));
+}
+
+// Phone / tablet: the canvas fills the whole screen, the HUD and controls lie on top.
+function resizeMobile() {
+  const hud = document.getElementById('hud');
+  document.documentElement.style.setProperty('--hud-h', hud.offsetHeight + 'px');
+  const wrap = document.getElementById('canvas-wrap');
+  const w = wrap.clientWidth || window.innerWidth;
+  const h = wrap.clientHeight || window.innerHeight;
+  const tablet = Math.min(w, h) >= 600;
+  if (w >= h) {
+    // landscape: a fixed slice of the room's height, as wide as the screen allows
+    S = tablet ? h / 430 : Math.max(1, h / 300);
+  } else {
+    S = w / (tablet ? 560 : 380);
+  }
+  // never show more than the whole room
+  S = Math.max(S, w / WORLD_W, h / WORLD_H);
+  VIEW_W = w / S;
+  VIEW_H = h / S;
+  applyCanvasSize(w, h);
+}
+
+function applyCanvasSize(cssW, cssH) {
   DPR = window.devicePixelRatio || 1;
-  canvas.style.width = Math.round(VIEW_W * S) + 'px';
-  canvas.style.height = Math.round(VIEW_H * S) + 'px';
-  canvas.width = Math.round(VIEW_W * S * DPR);
-  canvas.height = Math.round(VIEW_H * S * DPR);
-  document.documentElement.style.setProperty('--game-w', Math.round(VIEW_W * S) + 'px');
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.round(cssW * DPR);
+  canvas.height = Math.round(cssH * DPR);
+  document.documentElement.style.setProperty('--game-w', cssW + 'px');
   const need = Math.min(3, Math.max(2, Math.ceil(S * DPR)));
   if (need !== RES) {
     RES = need;
@@ -545,9 +566,25 @@ function updateCamera(dt) {
   if (G.state === 'title') {
     tx = 4.6 * T - VIEW_W / 2;
     ty = 4.2 * T - VIEW_H / 2;
+  } else if (Touch.active && Camera.tx == null) {
+    ty = Cat.y - 40 - VIEW_H * 0.65;
+  } else if (Touch.active && Camera.tx != null) {
+    // on a phone the view stays still while the cat walks around the middle,
+    // and only follows when she gets close to an edge
+    const mx = VIEW_W * 0.2, my = VIEW_H * 0.16;
+    tx = Camera.tx;
+    ty = Camera.ty;
+    // the cat sits a bit low on screen, so guests at the counter above her stay in view
+    const cx = Cat.x - VIEW_W / 2, cy = Cat.y - 40 - VIEW_H * 0.65;
+    if (cx < tx - mx) tx = cx + mx;
+    else if (cx > tx + mx) tx = cx - mx;
+    if (cy < ty - my) ty = cy + my;
+    else if (cy > ty + my) ty = cy - my;
   }
   tx = Math.max(0, Math.min(WORLD_W - VIEW_W, tx));
   ty = Math.max(0, Math.min(WORLD_H - VIEW_H, ty));
+  Camera.tx = tx;
+  Camera.ty = ty;
   if (Camera.x == null) {
     Camera.x = tx;
     Camera.y = ty;
@@ -604,6 +641,8 @@ function update(dt) {
     G.panelDirty = false;
     UI.updatePanel();
   }
+  const playing = G.state !== 'title';
+  if (playing !== document.body.classList.contains('playing')) document.body.classList.toggle('playing', playing);
   let hint = hintText();
   if (Touch.active) hint = hint.replace(/^E:/, '🐾:').replace('naciśnij E', 'dotknij 🐾').replace(/^Wybierz kategorię:.*/, 'Dotknij kategorii, żeby ją wziąć. ✕ zamyka.').replace('E albo Esc: zamknij', 'Dotknij 🐾, żeby zamknąć');
   UI.setHint(hint);

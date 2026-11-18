@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kocia Biblioteka">
   <title>Kocia Biblioteka</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -29,6 +33,8 @@
           <button id="btn-sfx" class="hud-btn icon" type="button" aria-label="Efekty dźwiękowe">🔊</button>
           <button id="btn-loyal" class="hud-btn" type="button" aria-label="Stali klienci">⭐<span class="lbl"> Stali</span></button>
           <button id="btn-map" class="hud-btn" type="button" aria-label="Mapa świata">🗺️<span class="lbl"> Mapa</span></button>
+          <button id="btn-fs" class="hud-btn icon touch-only" type="button" aria-label="Pełny ekran" hidden>⛶</button>
+          <button id="btn-panel" class="hud-btn icon touch-only" type="button" aria-label="Goście, torba i zapas" aria-expanded="false" aria-controls="panel">📋<span id="panel-badge" class="badge" hidden></span></button>
         </span>
       </div>
 
@@ -41,6 +47,7 @@
         </div>
 
         <div id="touch-ui" aria-hidden="true">
+          <div id="joy-zone"></div>
           <div id="joy"><div id="joy-knob"></div></div>
           <button id="btn-act" type="button" aria-label="Akcja">🐾</button>
         </div>
@@ -70,7 +77,8 @@
               <button id="btn-account" class="secondary small" type="button" hidden>☁️ Zaloguj się</button>
             </div>
             <p class="keys keys-desktop"><kbd>WASD</kbd>/<kbd>strzałki</kbd> chodzenie · <kbd>E</kbd>/<kbd>Spacja</kbd> akcja · <kbd>M</kbd> mapa · <kbd>K</kbd> stali klienci</p>
-            <p class="keys keys-touch">Joystick po lewej: chodzenie · 🐾 po prawej: akcja</p>
+            <p class="keys keys-touch">Dotknij i przesuń palec po lewej stronie ekranu: chodzenie · 🐾 po prawej: akcja · 📋 u góry: goście i zapas</p>
+            <p id="ios-tip" class="keys" hidden>📲 Na iPhonie dodaj grę do ekranu początkowego (Udostępnij → „Do ekranu początkowego”). Otworzy się wtedy na całym ekranie, bez paska przeglądarki.</p>
             <p class="keys">🎵 Gra ma muzykę i dźwięki. Wyciszysz je przyciskami u góry.</p>
           </div>
         </div>
@@ -170,6 +178,7 @@
       <div id="hint">Podejdź do szafy lub lady i naciśnij E</div>
     </main>
 
+    <div id="panel-backdrop" hidden></div>
     <aside id="panel">
       <section>
         <h2>Goście przy ladzie</h2>
@@ -198,6 +207,15 @@
   </div>
 
   <script src="js/stats.js"></script>
+  <div id="rotate">
+    <div class="card">
+      <div class="rotate-icon">📱</div>
+      <h1>Obróć telefon</h1>
+      <p class="sub">Kocia Biblioteka najwygodniej gra się poziomo.</p>
+      <div class="buttons"><button id="btn-portrait-ok" type="button" class="secondary">Graj pionowo</button></div>
+    </div>
+  </div>
+
   <script src="js/data.js"></script>
   <script src="js/art.js"></script>
   <script src="js/audio.js"></script>

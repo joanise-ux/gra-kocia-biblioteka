@@ -439,28 +439,6 @@ body.touch .overlay {
   #loyal-list { max-height: none; }
 }
 
-/* telefon w poziomie: jeden rząd HUD-u, podpowiedź na planszy między joystickiem a łapką */
-body.phone-land #stage { position: relative; }
-body.phone-land #hud { flex-wrap: nowrap; }
-body.phone-land .hud-item.name { display: none; }
-body.phone-land .hud-btn .lbl { display: none; }
-body.phone-land #hint {
-  position: absolute;
-  left: 50%;
-  bottom: 10px;
-  transform: translateX(-50%);
-  width: auto;
-  max-width: calc(var(--game-w) - 230px);
-  min-height: 0;
-  padding: 4px 10px;
-  font-size: 13px;
-  line-height: 1.25;
-  background: rgba(253, 245, 230, 0.92);
-  border-width: 2px;
-  pointer-events: none;
-  z-index: 2;
-}
-body.phone-land #hint:empty { display: none; }
 @media (max-width: 359px) { .hud-btn .lbl { display: none; } }
 /* konto gracza */
 .account { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
@@ -475,3 +453,208 @@ button.small { font-size: 15px; padding: 5px 14px; }
 .choose button { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .choose small { font-size: 14px; font-weight: 500; }
 body.touch button.small { min-height: 44px; }
+
+/* =========================================================
+   Telefon i tablet: gra jak aplikacja. Plansza na cały ekran,
+   bez przewijania strony, HUD i sterowanie na wierzchu,
+   panel gości wysuwany z prawej.
+   ========================================================= */
+.touch-only { display: none; }
+#joy-zone { display: none; }
+#panel-backdrop { display: none; }
+#rotate { display: none; }
+
+html:has(body.touch) { overscroll-behavior: none; height: 100%; }
+body.touch {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #6b4a3a;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+body.touch input { -webkit-user-select: text; user-select: text; }
+body.touch #app { display: block; padding: 0; }
+body.touch #canvas-wrap {
+  position: fixed;
+  z-index: 20; /* its overlays (title, shop, map) must cover the HUD bar */
+  inset: var(--hud-h, 44px) 0 0 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  max-width: none;
+}
+
+/* HUD: cienki pasek na górze planszy */
+body.touch #hud {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  gap: 5px;
+  padding: max(5px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) 6px
+    max(8px, env(safe-area-inset-left, 0px));
+  background: var(--page);
+  border-bottom: 3px solid var(--line);
+}
+body.touch .hud-item,
+body.touch .hud-btn {
+  font-size: 14px;
+  padding: 3px 9px;
+  border-width: 2px;
+  box-shadow: 0 2px 0 var(--line);
+  background: rgba(253, 245, 230, 0.9);
+}
+body.touch .hud-item.coins { background: rgba(255, 242, 196, 0.92); }
+body.touch .hud-item.region,
+body.touch .hud-item.name,
+body.touch .hud-btn .lbl { display: none; }
+body.touch .hud-right { margin-left: auto; gap: 5px; }
+body.touch .hud-btn { min-width: 36px; min-height: 32px; }
+body.touch .touch-only { display: inline-block; }
+body.touch .touch-only[hidden] { display: none !important; }
+#btn-panel { position: relative; }
+#btn-fs.on { background: var(--card2); }
+.badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--rose);
+  color: #fff;
+  border: 2px solid var(--line);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+}
+
+/* podpowiedź: na dole, między joystickiem a łapką */
+body.touch #hint {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 380px);
+  min-height: 0;
+  padding: 4px 12px;
+  font-size: 13px;
+  line-height: 1.25;
+  text-align: center;
+  background: rgba(253, 245, 230, 0.92);
+  border-width: 2px;
+  pointer-events: none;
+}
+body.touch #hint:empty { display: none; }
+@media (orientation: portrait) {
+  body.touch #hint { bottom: 160px; max-width: calc(100vw - 32px); }
+}
+
+/* sterowanie: joystick pojawia się pod palcem w lewej połowie ekranu */
+body.touch #touch-ui { position: fixed; inset: var(--hud-h, 44px) 0 0 0; z-index: 5; pointer-events: none; }
+body.touch #joy-zone {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  pointer-events: auto;
+  touch-action: none;
+}
+body.touch #joy {
+  left: max(22px, calc(env(safe-area-inset-left, 0px) + 12px));
+  bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  width: 124px;
+  height: 124px;
+  opacity: 0.55;
+  pointer-events: auto;
+  transition: opacity 0.15s;
+}
+body.touch #joy.on { opacity: 0.9; bottom: auto; }
+body.touch #joy-knob { width: 54px; height: 54px; margin: -27px 0 0 -27px; }
+body.touch #btn-act {
+  right: max(24px, calc(env(safe-area-inset-right, 0px) + 14px));
+  bottom: max(22px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+  width: 92px;
+  height: 92px;
+  font-size: 40px;
+  pointer-events: auto;
+}
+body.touch #canvas-wrap.picker-open #touch-ui { display: none; }
+
+/* menu kategorii: dwie kolumny, mieści się w niskim ekranie */
+body.touch .picker {
+  bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  width: min(560px, 92vw);
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
+  z-index: 8;
+}
+body.touch #picker-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+body.touch #picker-list button { min-height: 44px; }
+@media (orientation: portrait) { body.touch #picker-list { grid-template-columns: 1fr; } }
+
+/* panel boczny jako szuflada */
+body.touch #panel-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(107, 74, 58, 0.35);
+}
+body.touch #panel-backdrop[hidden] { display: none; }
+body.touch #panel {
+  position: fixed;
+  z-index: 31;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(330px, 86vw);
+  max-width: none;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px))
+    max(10px, env(safe-area-inset-bottom, 0px)) 10px;
+  background: var(--page);
+  border-left: 3px solid var(--line);
+  box-shadow: -4px 0 0 rgba(107, 74, 58, 0.25);
+  transform: translateX(105%);
+  transition: transform 0.2s ease-out;
+  -webkit-user-select: text;
+  user-select: text;
+}
+body.touch #panel section { flex: none; }
+body.touch.panel-open #panel { transform: none; }
+body.touch #panel .howto { display: none; }
+@media (prefers-reduced-motion: reduce) { body.touch #panel { transition: none; } }
+
+/* prośba o obrócenie telefonu w trakcie gry */
+@media (orientation: portrait) and (max-width: 599px) {
+  body.touch.playing:not(.portrait-ok) #rotate {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: var(--page);
+  }
+}
+.rotate-icon { font-size: 54px; display: inline-block; animation: tilt 1.8s ease-in-out infinite; }
+@keyframes tilt { 0%, 30% { transform: rotate(0deg); } 60%, 100% { transform: rotate(-90deg); } }
+@media (prefers-reduced-motion: reduce) { .rotate-icon { animation: none; transform: rotate(-90deg); } }

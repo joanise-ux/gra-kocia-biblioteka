@@ -307,6 +307,9 @@ const UI = {
           <div class="what">oddaje książkę do kosza zwrotów</div></li>`);
       }
     }
+    const waiting = G.customers.filter((c) => c.kind === 'shopper' && c.state === 'wait' && !c.leaving).length;
+    $('panel-badge').hidden = !waiting;
+    $('panel-badge').textContent = waiting;
     $('requests').innerHTML = items.length ? items.join('') : '<li class="empty">Cisza i spokój… czekamy na gości ☕</li>';
     $('cart-info').textContent = G.cart.length ? `W koszu zwrotów: ${G.cart.length} 📚` : '';
 

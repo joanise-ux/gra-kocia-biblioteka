@@ -5,7 +5,7 @@ Przytulna gra w przeglądarce. Jesteś trzykolorową kotką, która prowadzi bib
 ## Jak grać
 
 - **Komputer:** `WASD` / strzałki to chodzenie, `E` / `Spacja` to akcja (otwórz szafę, podaj książkę, weź zwrot).
-- **Telefon:** joystick po lewej, przycisk 🐾 po prawej.
+- **Telefon (najlepiej poziomo):** gra zajmuje cały ekran jak aplikacja. Dotknij i przesuń palec w lewej połowie ekranu, a pod palcem pojawi się joystick. Przycisk 🐾 po prawej to akcja, a 📋 u góry wysuwa panel z gośćmi, torbą i zapasem. Na Androidzie gra po starcie przechodzi na pełny ekran (przycisk ⛶ przełącza). Na iPhonie bez paska przeglądarki zagrasz po dodaniu gry do ekranu początkowego (Udostępnij → „Do ekranu początkowego”).
 - Dymek gościa pokazuje kolor książki (kategorię) oraz „kup” albo „pożycz”. Nikt się nie spieszy.
 - Na koniec dnia możesz kupić ulepszenia: szybkie łapki, torbę na książki, nowe szafy i półki, większą ladę, przytulny kącik.
 - Kotka bawi się też w sali: podejdź i naciśnij `E` przy fotelu (siada, a po chwili zasypia), przy ścianie z lampkami (łapie je łapką), przy kwiatku (podlewa go, kwiatek zakwita, a za pierwsze podlanie danego dnia dostajesz 💗) albo przy stoliku z książką i świeczką (czyta i przewraca strony). Ruch kończy zabawę. Na podłodze leży też kłębek wełny: pacnij go `E` albo popchnij, idąc, a potoczy się i odbije od ścian, zostawiając nitkę.
