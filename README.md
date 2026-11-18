@@ -49,7 +49,7 @@ Konfiguracja (jednorazowo):
 1. Załóż darmowy projekt na supabase.com (region EU, np. Frankfurt).
 2. **SQL Editor → New query**: wklej `supabase/schema.sql` → **Run**.
 3. **Authentication → URL Configuration → Site URL**: adres gry.
-4. **Authentication → Emails → Templates → Magic Link**: w treści maila wstaw kod `{{ .Token }}`, np. „Twój kod do Kociej Biblioteki: {{ .Token }}”.
+4. **Authentication → Emails → Templates**: w szablonach **Magic Link** (gracz powracający) i **Confirm signup** (pierwsze logowanie nowego gracza) wstaw kod `{{ .Token }}`, np. „Twój kod do Kociej Biblioteki: {{ .Token }}”. Szablony da się edytować dopiero po ustawieniu własnego SMTP (krok 5).
 5. **Authentication → Emails → SMTP Settings**: podłącz własny serwer pocztowy (np. darmowy plan Resend albo Brevo). Wbudowana poczta Supabase wysyła maile tylko do członków zespołu projektu i ma bardzo niski limit, więc bez tego gracze nie dostaną kodu.
 6. **Project Settings → API**: skopiuj *Project URL* i klucz *anon public* do `js/cloud.js` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`). Klucz `anon` jest publiczny z założenia, a dane chroni RLS. Nigdy nie wklejaj klucza `service_role`.
 
