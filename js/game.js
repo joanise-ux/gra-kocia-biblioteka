@@ -728,7 +728,7 @@ function drawRoomEntrance() {
   ctx.stroke();
   rr(ctx, 19 * T - 22, sy, T + 44, 24, 8);
   fs(ctx, '#fff4e2', 2.5);
-  ctx.font = '700 11px Fredoka, "Pixelify Sans", sans-serif';
+  ctx.font = '700 11px "Baloo 2", "Pixelify Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = OL;
@@ -748,7 +748,7 @@ function drawRoomEntrance() {
   // tabliczka
   rr(ctx, 19 * T - 6, y0 + h / 2 - 12, T + 12, 22, 6);
   fs(ctx, '#fff4e2', 2);
-  ctx.font = '700 10px Fredoka, "Pixelify Sans", sans-serif';
+  ctx.font = '700 10px "Baloo 2", "Pixelify Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = OL;
@@ -974,7 +974,7 @@ function drawParticles() {
 }
 
 function drawFloaters() {
-  ctx.font = '700 14px Fredoka, "Pixelify Sans", sans-serif';
+  ctx.font = '700 14px "Baloo 2", "Pixelify Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   for (const f of G.floaters) {

@@ -717,7 +717,7 @@ function makeBookcaseArt(shelves, seed) {
         rr(g, 14, top + 3, 28, rowH - 8, 3);
         fs(g, sh.count ? col : shade(col, 0.5), 1.5);
         g.fillStyle = '#fffaf0';
-        g.font = '600 6.4px Fredoka, "Pixelify Sans", sans-serif';
+        g.font = '600 6.4px "Baloo 2", "Pixelify Sans", sans-serif';
         g.textAlign = 'center';
         g.textBaseline = 'middle';
         const label = CATEGORIES[sh.cat].name;
@@ -725,7 +725,7 @@ function makeBookcaseArt(shelves, seed) {
       } else {
         // pusta półka – miejsce na nową kategorię
         g.fillStyle = 'rgba(255,240,220,0.18)';
-        g.font = '500 6.5px Fredoka, sans-serif';
+        g.font = '500 6.5px "Baloo 2", sans-serif';
         g.textAlign = 'center';
         g.textBaseline = 'middle';
         g.fillText('wolna półka', BOOKCASE_W / 2, top + rowH / 2 - 1.5);
@@ -1247,7 +1247,7 @@ function makeCounterArt() {
     // napisy na froncie
     rr(g, 3.5 * T - 26, 70, 52, 16, 5);
     fs(g, '#fff4e2', 2);
-    g.font = '600 10px Fredoka, "Pixelify Sans", sans-serif';
+    g.font = '600 10px "Baloo 2", "Pixelify Sans", sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
     g.fillStyle = OL;

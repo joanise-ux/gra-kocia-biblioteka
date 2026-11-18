@@ -437,7 +437,7 @@ function drawCustomerBubble(ctx, c) {
   if (r.mode === 'buy') drawCoin(ctx, cx + 12, by + 15, 8);
   else drawBorrow(ctx, cx + 12, by + 15, 8);
   // podpis, żeby ikonka nie myliła się z upływem czasu
-  ctx.font = '600 9px Fredoka, "Pixelify Sans", sans-serif';
+  ctx.font = '600 9px "Baloo 2", "Pixelify Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = r.mode === 'buy' ? '#b07a12' : '#3f78a8';
@@ -446,7 +446,7 @@ function drawCustomerBubble(ctx, c) {
 
 function drawSpeech(ctx, text, cx, bottom) {
   text = withName(text);
-  ctx.font = '600 12px Fredoka, "Pixelify Sans", sans-serif';
+  ctx.font = '600 12px "Baloo 2", "Pixelify Sans", sans-serif';
   const tw = Math.ceil(ctx.measureText(text).width);
   const w = tw + 18, h = 24;
   let bx = cx - w / 2;
